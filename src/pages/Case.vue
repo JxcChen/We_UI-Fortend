@@ -182,7 +182,7 @@
             addCase(){
                 
                 const addCaseData = this.form
-                axios.post("http://192.168.1.100:8001/api/case/"+this.pro_id,addCaseData).then(
+                axios.post("http://127.0.0.1:8001/api/case/"+this.pro_id,addCaseData).then(
                     response => {
                         this.submitUpload()
                         console.log(response.data)
@@ -195,7 +195,7 @@
             // 获取对应项目下的所有用例
             getCaseList(pro_id){
                 
-                axios.get('http://192.168.1.100:8001/api/case/' + pro_id).then(
+                axios.get('http://127.0.0.1:8001/api/case/' + pro_id).then(
                     response => {
                         this.cases = response.data.case_list
                     }
@@ -217,7 +217,7 @@
             },
             // 修改用例
             editCase(){
-                axios.put('http://192.168.1.100:8001/api/case/'+this.edit_form.id+'/',this.edit_form).then(
+                axios.put('http://127.0.0.1:8001/api/case/'+this.edit_form.id+'/',this.edit_form).then(
                     response => {
                         if (response.data.code == 1){
                             this.isEdit = false
@@ -232,7 +232,7 @@
             deleteCase(del_case){
                 const isDel = confirm("确定要删除该项目吗")
                 if(isDel){
-                    axios.delete('http://192.168.1.100:8001/api/case/'+del_case.id+'/').then(
+                    axios.delete('http://127.0.0.1:8001/api/case/'+del_case.id+'/').then(
                         response=> {
                             this.$message(response.data.msg)
                             if(response.data.code == 1){
@@ -254,13 +254,13 @@
         computed:{
             // 文件上传路径
             upLoadUrl(){
-                return 'http://192.168.1.100:8001/api/case/uploadScript/' + this.pro_id
+                return 'http://127.0.0.1:8001/api/case/uploadScript/' + this.pro_id
             },
             
         },
         mounted(){
             // 获取该用户下拥有权限的项目
-            axios.get('http://192.168.1.100:8001/api/project/',{
+            axios.get('http://127.0.0.1:8001/api/project/',{
                 params:{
                     author:'admin'
                 }

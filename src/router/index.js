@@ -5,6 +5,7 @@ import VueRouter from 'vue-router'
 import Project from '../pages/Project'
 import Case from '../pages/Case'
 import Login from '../components/Login'
+import Index from '../components/Index'
 Vue.use(VueRouter)
 
 
@@ -17,21 +18,30 @@ VueRouter.prototype.push = function push(location) {
 const Router = new VueRouter({
     routes:[
 		{
-            name:'project',
-			path:'/project',
-			component:Project
-		},
-		{
-            name:'case',
-			path:'/case',
-			component:Case
+            name:'index',
+			path:'/home',
+			component:Index,
+			children:[
+				{
+					name:'project',
+					path:'project',
+					component:Project
+				},
+				{
+					name:'case',
+					path:'case',
+					component:Case
+				},
+			]
 		},
 		{
 			name:'login',
-			path:'/login',
+			path:'/',
 			component:Login
-		}
+		},
+		
     ]
 })
+
 
 export default Router

@@ -1,30 +1,32 @@
 <template>
-  <div class="container"  >
-    <div class="row">
-        <div class="col-md-offset-3 col-md-6">
-            <form class="form-horizontal">
-                <span class="heading">用户登录</span>
-                <div class="form-group">
-                    <input type="email" class="form-control" v-model="username" placeholder="请输入账号">
-                    <i class="fa fa-user"></i>
+    <div class="login" >
+        <div class="container" :style="bgI"  >
+            <div class="row">
+                <div class="col-md-offset-3 col-md-6">
+                    <form class="form-horizontal">
+                        <span class="heading">用户登录</span>
+                        <div class="form-group">
+                            <input type="text" class="form-control" v-model="username" placeholder="请输入账号">
+                            <i class="fa fa-user"></i>
+                        </div>
+                        <div class="form-group help">
+                            <input type="password" class="form-control" v-model="password" placeholder="密　码">
+                            <i class="fa fa-lock"></i>
+                            <a href="#" class="fa fa-question-circle"></a>
+                        </div>
+                        <div class="form-group">
+                            <div class="main-checkbox">
+                                <input type="checkbox" value="None" id="checkbox1" name="check"/>
+                                <label for="checkbox1"></label>
+                            </div>
+                            <span class="text">Remember me</span>
+                            <button class="btn btn-default" @click="login">登录</button>
+                        </div>
+                    </form>
                 </div>
-                <div class="form-group help">
-                    <input type="password" class="form-control" v-model="password" placeholder="密　码">
-                    <i class="fa fa-lock"></i>
-                    <a href="#" class="fa fa-question-circle"></a>
-                </div>
-                <div class="form-group">
-                    <div class="main-checkbox">
-                        <input type="checkbox" value="None" id="checkbox1" name="check"/>
-                        <label for="checkbox1"></label>
-                    </div>
-                    <span class="text">Remember me</span>
-                    <button class="btn btn-default" @click="login">登录</button>
-                </div>
-            </form>
+            </div>
         </div>
     </div>
-</div>
 </template>
 
 <script>
@@ -48,39 +50,61 @@ export default {
                     username:this.username,
                     password:this.password
                 }
-                axios.post('http://192.168.1.100/user/login',loginData).then(
+                axios.post('http://127.0.0.1:8001/api/authorizations/',loginData).then(
                     response=>{
-                        if(response.data.code === 1){
-                            this.changeLogin({Authorization: 'Bazer '+response.data.token})
-                            this.$router.push('/case')
-                        }
-                        else{
-                            this.$message('账号或密码错误')
-                        }
-                        
+                        // if(response.data.code === 1){
+                        //     this.changeLogin({Authorization: 'Bazer '+response.data.token})
+                        //     this.$router.push('/case')
+                        // }
+                        // else{
+                        //     this.$message('账号或密码错误')
+                        // }
+                        this.changeLogin({Authorization: 'Bazer '+response.data.token,name:response.data.username,id:response.data.id})
+                        this.$router.push('/')
                     }
                 )
             }
             
         }
+    },
+    computed:{
+        bgI(){
+        return {
+          backgroundImage: 'url('+require('../assets/login.png')+')', 
+          backgroundSize:'cover',
+          backgroundRepeat:'no-repeat',
+          backgroundPosition:'center center',height:'70%',width:'80%',
+          marginTop: '118px'
+        }
+    }
     }
 }
 </script>
 
 <style scoped> 
-    .form-bg{
+.form-bg{
     background: #00b4ef;
+}
+/* #044974 */
+.login{
+    background-color: #044974;
+    position: fixed;
+    height: 100%;
+    width: 100%;
 }
 .form-horizontal{
     background: #fff;
     padding-bottom: 40px;
     border-radius: 15px;
     text-align: center;
+    width: 500px;
+    margin-left: 101px;
+    margin-top: 50px;
 }
 .form-horizontal .heading{
     display: block;
     font-size: 35px;
-    font-weight: 700;
+    font-weight: 650;
     padding: 35px 0;
     border-bottom: 1px solid #f0f0f0;
     margin-bottom: 30px;

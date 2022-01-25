@@ -119,7 +119,7 @@
         methods:{
             addProject(){
                 const addProjectData = this.form
-                axios.post("http://192.168.1.100:8001/api/project/",addProjectData).then(
+                axios.post("http://127.0.0.1:8001/api/project/",addProjectData).then(
                     response => {
                         console.log(response.data)
                         this.dialogFormVisible = false
@@ -128,7 +128,7 @@
                 )
             },
             getProjectList(){
-                axios.get("http://192.168.1.100:8001/api/project").then(
+                axios.get("http://127.0.0.1:8001/api/project/").then(
                 response => {
                     this.projects = response.data.pro_list
                 }
@@ -139,7 +139,7 @@
                 this.isEdit = true
             },
             editProject(){
-                axios.put('http://192.168.1.100:8001/api/project/'+this.edit_form.id+'/',this.edit_form).then(
+                axios.put('http://127.0.0.1:8001/api/project/'+this.edit_form.id+'/',this.edit_form).then(
                     response => {
                         
                         if (response.data.code == 1){
@@ -155,7 +155,7 @@
             deleteProject(project){
                 const isDel = confirm("确定要删除该项目吗")
                 if(isDel){
-                    axios.delete('http://192.168.1.100:8001/api/project/'+project.id+'/').then(
+                    axios.delete('http://127.0.0.1:8001/api/project/'+project.id+'/').then(
                         response=> {
                             this.$message(response.data.msg)
                             if(response.data.code == 1){
