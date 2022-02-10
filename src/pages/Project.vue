@@ -151,7 +151,7 @@ export default {
           },
         })
         .then((response) => {
-          this.projects = response.data.data;
+          this.projects = response.data.data.res_pro_list;
         });
     },
     cancleAdd() {
