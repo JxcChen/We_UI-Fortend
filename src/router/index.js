@@ -6,6 +6,8 @@ import Project from '../pages/Project'
 import Case from '../pages/Case'
 import Login from '../components/Login'
 import Index from '../components/Index'
+import User from '../pages/User'
+import Element from '../pages/Element'
 Vue.use(VueRouter)
 
 
@@ -31,6 +33,16 @@ const Router = new VueRouter({
 					name: 'case',
 					path: 'case',
 					component: Case
+				},
+				{
+					name: 'user',
+					path: 'user',
+					component: User
+				},
+				{
+					name: 'element',
+					path: 'element',
+					component: Element
 				},
 			]
 		},

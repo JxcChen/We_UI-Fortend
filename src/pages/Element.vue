@@ -1,27 +1,21 @@
 <template>
   <div>
     <el-button @click="dialogFormVisible = true">新增项目</el-button>
-    <el-table :data="projects" stripe style="width: 80%">
-      <el-table-column prop="id" label="id" > </el-table-column>
+    <el-table :data="projects" stripe>
+      <el-table-column prop="id" label="id" width="180"> </el-table-column>
       <el-table-column prop="name" label="项目名称" width="180">
       </el-table-column>
-      <el-table-column prop="author_name" label="负责人"> </el-table-column>
+      <el-table-column prop="author" label="负责人"> </el-table-column>
       <el-table-column prop="host" label="项目地址"> </el-table-column>
       <el-table-column prop="max_threads" label="最大并发" width="150px">
       </el-table-column>
-      <el-table-column fixed="right" label="操作" width="300">
+      <el-table-column fixed="right" label="操作" width="200">
         <template slot-scope="scope">
           <el-button
             type="primary"
             size="small"
             @click="intoEditProject(scope.row)"
             >编辑</el-button
-          >
-          <el-button
-            type="primary"
-            size="small"
-            @click="intoSetTeamMember(scope.row)"
-            >添加协作人员</el-button
           >
           <el-button
             type="danger"
@@ -32,7 +26,7 @@
         </template>
       </el-table-column>
     </el-table>
-    <!-- 新增项目 -->
+
     <el-dialog
       title="项目信息"
       :modal-append-to-body="false"
@@ -59,7 +53,7 @@
         <el-button type="danger" @click="cancleAdd">取 消</el-button>
       </div>
     </el-dialog>
-    <!-- 编辑项目 -->
+
     <el-dialog
       title="项目信息"
       :visible.sync="isEdit"
@@ -92,33 +86,7 @@
         <el-button type="danger" @click="isEdit = false">取 消</el-button>
       </div>
     </el-dialog>
-
-      <!-- 配置协作人员 -->
-    <el-dialog
-      title="配置协作组员"
-      :modal-append-to-body="false"
-      :visible.sync="setMember"
-      width="30%"
-    >
-      选择协作人员
-      <el-select size="small" v-model="teamMembers" multiple placeholder="请选择">
-        <el-option
-          v-for="u in users"
-          :key="u.id"
-          :label="u.username"
-          :value="u.id"
-        >
-        </el-option>
-      </el-select>
-
-      <div slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="setTeamMember">确 定</el-button>
-        <el-button type="danger" @click="setMember = false">取 消</el-button>
-      </div>
-    </el-dialog>
   </div>
-
-  
 </template>
 
 <script>
@@ -131,7 +99,6 @@ export default {
       projects: [],
       isEdit: false,
       dialogFormVisible: false,
-      // 新增项目的表单对应数据
       form: {
         name: "",
         host: "",
@@ -139,7 +106,6 @@ export default {
         max_threads: "",
         auto_host: "",
       },
-      // 编辑项目的表单数据
       edit_form: {
         id: "",
         name: "",
@@ -149,12 +115,6 @@ export default {
         auto_host: "",
       },
       token: localStorage.Authorization,
-      setMember: false,
-      users: [],
-      // 协作人员的列表
-      teamMembers: [],
-      // 设置协作人员的项目id
-      setTeamProjectId: 0
     };
   },
   methods: {
@@ -243,52 +203,6 @@ export default {
             }
           });
       }
-    },
-    getUserList() {
-      axios
-        .get("http://127.0.0.1:8001/api/user/", {
-          headers: {
-            Authorization: this.token,
-          },
-          responseType: "json",
-        })
-        .then((response) => {
-          this.users = response.data.data.filter(user => user.id != localStorage.UserId)
-        });
-    },
-    // 获取项目已有的写作人员列表
-    getTeamMembersList(project_id){
-      axios.get("http://127.0.0.1:8001/api/teamMember/",{
-        headers: {
-          Authorization: this.token,
-        },
-        responseType: "json",
-        params:{
-          project_id: project_id
-        }
-      }).then((response) => {
-        this.teamMembers = response.data.data
-      })
-    },
-    // 进入配置组员页面
-    intoSetTeamMember(project){
-      // 获取协作人员列表
-      this.getTeamMembersList(project.id)
-      this.setTeamProjectId = project.id
-      // 获取所有人员列表
-      this.getUserList()
-      this.setMember = true
-    },
-    setTeamMember(){
-      const request_data = {users:this.teamMembers,project_id:this.setTeamProjectId}
-      axios.post("http://127.0.0.1:8001/api/teamMember/",request_data,{
-        headers: {
-          Authorization: this.token,
-        },
-        responseType: "json",
-      }).then((response) => {
-        this.setMember=false
-      })
     },
     resetForm() {
       this.form.name = "";

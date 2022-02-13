@@ -68,13 +68,6 @@ export default {
         axios
           .post("http://127.0.0.1:8001/api/login/", loginData)
           .then((response) => {
-            // if(response.data.code === 1){
-            //     this.changeLogin({Authorization: 'Bazer '+response.data.token})
-            //     this.$router.push('/case')
-            // }
-            // else{
-            //     this.$message('账号或密码错误')
-            // }
             this.changeLogin({
               Authorization: "JWT " + response.data.token,
               name: response.data.username,

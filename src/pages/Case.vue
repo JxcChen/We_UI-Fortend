@@ -33,13 +33,13 @@
     </div>
 
     <el-table :data="cases" stripe>
-      <el-table-column prop="id" label="id" width="180"> </el-table-column>
-      <el-table-column prop="name" label="用例名称" width="180">
+      <el-table-column prop="id" label="id" > </el-table-column>
+      <el-table-column prop="name" label="用例名称" >
       </el-table-column>
       <el-table-column prop="script_name" label="脚本名称"> </el-table-column>
-      <el-table-column prop="is_threads" label="是否并发" width="100">
+      <el-table-column prop="is_threads" label="是否并发" >
       </el-table-column>
-      <el-table-column fixed="right" label="操作" width="300">
+      <el-table-column fixed="right" label="操作" >
         <template slot-scope="scope">
           <el-button
             ref="excuseBtn"

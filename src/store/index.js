@@ -16,14 +16,14 @@ const mutations = {
         localStorage.setItem('User',user.name)
         localStorage.setItem('UserId',user.id)
         state.isLogin = true
-    }
+    },
+
 }
 
 const state = {
     // 登录态储存信息
     Authorization : localStorage.getItem('Authorization') ? localStorage.getItem('Authorization') : '',
-    isLogin: false
-
+    isLogin: false,
 }
 
 
