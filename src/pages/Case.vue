@@ -55,6 +55,13 @@
             @click="intoEditCase(scope.row)"
             >编辑</el-button
           >
+          <el-button
+            ref="excuseBtn"
+            type="danger"
+            size="small"
+            @click="lookReport(scope.row)"
+            >报告</el-button
+          >
           <el-button type="danger" size="small" @click="deleteCase(scope.row)"
             >删除</el-button
           >
@@ -156,6 +163,20 @@
         <el-button type="danger" @click="isEdit = false">取 消</el-button>
       </div>
     </el-dialog>
+
+
+
+    <el-dialog
+      title="测试报告"
+      :modal-append-to-body="false"
+      :visible.sync="isLookReport"
+      width="80%"
+    >
+      <div>
+        <div v-html="htmlText" class="web-con"></div>
+      </div>
+      
+    </el-dialog>
   </div>
 </template>
 
@@ -194,6 +215,8 @@ export default {
       hostList: {},
       currentHostList: [],
       excuseHost: "",
+      htmlText: "",
+      isLookReport: false
     };
   },
   methods: {
@@ -222,20 +245,21 @@ export default {
     addCase() {
       let addCaseData = this.form;
       addCaseData["project_id"] = this.pro_id;
+      // 上传脚本文件
       this.submitUpload();
       axios
-        .post("http://127.0.0.1:8001/api/case/", addCaseData, {
-          headers: {
-            Authorization: this.token,
-          },
-          responseType: "json",
-        })
-        .then((response) => {
-          console.log(response.data);
-          this.dialogFormVisible = false;
-          this.getCaseList(this.pro_id);
-          this.resetForm();
-        });
+      .post("http://127.0.0.1:8001/api/case/", addCaseData, {
+        headers: {
+          Authorization: this.token,
+        },
+        responseType: "json",
+      })
+      .then((response) => {
+        console.log(response.data);
+        this.dialogFormVisible = false;
+        this.getCaseList(this.pro_id);
+        this.resetForm();
+      });
     },
     // 获取对应项目下的所有用例
     getCaseList(pro_id) {
@@ -297,7 +321,7 @@ export default {
           }
         });
     },
-    // 删除用例
+    // 执行用例
     excuseCase(excuse_case) {
       // this.$refs.excuseBtn.textContent = "执行中";
       console.log(this.$refs.excuseBtn);
@@ -333,6 +357,23 @@ export default {
             }
           });
       }
+    },
+    // 查看报告
+    lookReport(report_case){
+      axios.get("http://127.0.0.1:8001/api/case/report/" + report_case.id + "/",{
+            headers: {
+              Authorization: this.token,
+            },
+          })
+          .then((response) => {
+
+            if (response.data.code == 3) {
+              this.$message(response.data.msg);
+            }else{
+              this.htmlText = response.data
+              this.isLookReport = true
+            }
+          });
     },
     resetForm() {
       this.form.name = "";

@@ -1,7 +1,7 @@
 <template>
   <div>
     <el-button @click="dialogFormVisible = true">新增项目</el-button>
-    <el-table :data="projects" stripe style="width: 80%">
+    <el-table :data="projects" stripe style="width: 90%">
       <el-table-column prop="id" label="id" > </el-table-column>
       <el-table-column prop="name" label="项目名称" width="180">
       </el-table-column>
@@ -149,7 +149,9 @@ export default {
         auto_host: "",
       },
       token: localStorage.Authorization,
+      // 是否处于配置协作人员
       setMember: false,
+      // 用户列表
       users: [],
       // 协作人员的列表
       teamMembers: [],
