@@ -1,7 +1,7 @@
 <template>
   <div>
     <el-button @click="dialogFormVisible = true">新增项目</el-button>
-    <el-table :data="projects" stripe style="width: 90%">
+    <el-table :data="projects" stripe style="width: 80%">
       <el-table-column prop="id" label="id" > </el-table-column>
       <el-table-column prop="name" label="项目名称" width="180">
       </el-table-column>

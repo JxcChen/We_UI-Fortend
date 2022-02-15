@@ -15,15 +15,27 @@
 
       <el-button
         size="small"
-        style="margin-left: 20px"
+        style="margin-left: 10px"
         @click="concurrentExcution"
         >并发执行</el-button
       >
       <el-button
         size="small"
-        style="margin-left: 20px"
+        style="margin-left: 10px"
+        @click="lookReportSummary"
+        >查看报告总结</el-button
+      >
+      <el-button
+        size="small"
+        style="margin-left: 10px"
         @click="dialogFormVisible = true"
         >新增用例</el-button
+      >
+      <el-button
+        size="small"
+        style="margin-left: 10px"
+        @click="downloadClient"
+        >下载调试包</el-button
       >
       <div style="float: right">
         执行路径：
@@ -184,6 +196,16 @@
       </div>
       
     </el-dialog>
+
+    <el-dialog
+      title="测试报告总结"
+      :modal-append-to-body="false"
+      :visible.sync="isLookReportSummary"
+      width="30%"
+    >
+      <div style="text-align:center;font-size:16px" ref="reportSummary"></div>
+      
+    </el-dialog>
   </div>
 </template>
 
@@ -224,7 +246,9 @@ export default {
       currentHostList: [],
       excuseHost: "",
       htmlText: "",
-      isLookReport: false
+      isLookReport: false,
+      isLookReportSummary: false,
+      reportSummaryContent: ''
     };
   },
   methods: {
@@ -237,7 +261,7 @@ export default {
     beforeUploadEdit(file) {
       this.edit_form.script_name = file.name;
     },
-    handleExceed(files, fileList) {
+    handleExceed() {
       this.$message.warning(`一次只能上传一个脚本文件`);
     },
     beforeRemove(file, fileList) {
@@ -387,9 +411,9 @@ export default {
               })
               this.$nextTick(() => {
                 // 将js脚本内容插入到标签当中
-                var ele = document.createElement("script")
-                ele.innerHTML = JSScript
-                this.$refs.reportHTML.append(ele)
+                var newElement = document.createElement("script")
+                newElement.innerHTML = JSScript
+                this.$refs.reportHTML.append(newElement)
               })
               this.isLookReport = true
             }
@@ -414,6 +438,39 @@ export default {
         responseType: "json",
       }).then(response => {
         confirm(response.data.msg)
+      })
+    },
+    // 查看项目报告总结
+    lookReportSummary(){
+      axios.get(constant.baseURL+"case/reportsummary/" +this.pro_id+"/",{
+        headers: {
+          Authorization: this.token,
+        },
+        responseType: "json",
+      }).then(response => {
+        // alert(response.data.data)
+        if(response.data.code === 1){
+          this.isLookReportSummary = true
+          // this.reportSummaryContent = response.data.data
+          // var ele = document.createElement("html")
+          // ele.innerHTML = response.data.data
+          this.$nextTick(() => {
+            // 将js脚本内容插入到标签当中
+            console.log(this.$refs.reportSummary)
+            this.$refs.reportSummary.innerHTML = response.data.data
+          })
+          
+        }else{
+          this.$message(response.data.msg)
+        }
+      })
+    },
+    // 下载调试包
+    downloadClient(){
+      axios.get(constant.baseURL+"case/downloadclient/" +this.pro_id+"/",{
+        headers: {
+          Authorization: this.token,
+        },
       })
     }
   },
