@@ -12,6 +12,13 @@
         >
         </el-option>
       </el-select>
+
+      <el-button
+        size="small"
+        style="margin-left: 20px"
+        @click="concurrentExcution"
+        >并发执行</el-button
+      >
       <el-button
         size="small"
         style="margin-left: 20px"
@@ -173,7 +180,7 @@
       width="80%"
     >
       <div>
-        <div v-html="htmlText" class="web-con"></div>
+        <div ref="reportHTML" v-html="htmlText" class="web-con"></div>
       </div>
       
     </el-dialog>
@@ -182,6 +189,7 @@
 
 <script>
 import axios from "axios";
+import constant from "../constant/constant"
 axios.defaults.withCredentials = true;
 export default {
   name: "Project",
@@ -248,7 +256,7 @@ export default {
       // 上传脚本文件
       this.submitUpload();
       axios
-      .post("http://127.0.0.1:8001/api/case/", addCaseData, {
+      .post(constant.baseURL+"case/", addCaseData, {
         headers: {
           Authorization: this.token,
         },
@@ -264,7 +272,7 @@ export default {
     // 获取对应项目下的所有用例
     getCaseList(pro_id) {
       axios
-        .get("http://127.0.0.1:8001/api/case/", {
+        .get(constant.baseURL+"case/", {
           headers: {
             Authorization: this.token,
           },
@@ -285,7 +293,7 @@ export default {
     },
     // 进入修改用例页面
     intoEditCase(edit_case) {
-      console.log(edit_case);
+      // edit_case是要修改的case数据
       if (edit_case.script_name !== "") {
         this.fileList.splice(0, 1, { name: edit_case.script_name });
       }
@@ -303,7 +311,7 @@ export default {
       this.submitUpload();
       axios
         .put(
-          "http://127.0.0.1:8001/api/case/" + this.edit_form.id + "/",
+          constant.baseURL+"case/" + this.edit_form.id + "/",
           this.edit_form,
           {
             headers: {
@@ -326,7 +334,7 @@ export default {
       // this.$refs.excuseBtn.textContent = "执行中";
       console.log(this.$refs.excuseBtn);
       axios
-        .get("http://127.0.0.1:8001/api/case/excuse/" + excuse_case.id + "/", {
+        .get(constant.baseURL+"case/excuse/" + excuse_case.id + "/", {
           headers: {
             Authorization: this.token,
           },
@@ -344,7 +352,7 @@ export default {
       const isDel = confirm("确定要删除该项目吗");
       if (isDel) {
         axios
-          .delete("http://127.0.0.1:8001/api/case/" + del_case.id + "/", {
+          .delete(constant.baseURL+"case/" + del_case.id + "/", {
             headers: {
               Authorization: this.token,
             },
@@ -360,7 +368,7 @@ export default {
     },
     // 查看报告
     lookReport(report_case){
-      axios.get("http://127.0.0.1:8001/api/case/report/" + report_case.id + "/",{
+      axios.get(constant.baseURL+"case/report/" + report_case.id + "/",{
             headers: {
               Authorization: this.token,
             },
@@ -370,22 +378,49 @@ export default {
             if (response.data.code == 3) {
               this.$message(response.data.msg);
             }else{
+              // 因为v-html不会执行js内容 所以要将返回数据中的 js内容获取出来 进行动态添加
               this.htmlText = response.data
+              let JSScript = ''
+              // 使用正则获取js内容
+              response.data.replace(/<script.*?>([\s\S]+?)<\/script>/img,function(_,js){    //正则匹配出script中的内容
+                      JSScript = js
+              })
+              this.$nextTick(() => {
+                // 将js脚本内容插入到标签当中
+                var ele = document.createElement("script")
+                ele.innerHTML = JSScript
+                this.$refs.reportHTML.append(ele)
+              })
               this.isLookReport = true
             }
           });
     },
+    // 清空新增表单数据
     resetForm() {
       this.form.name = "";
       this.form.is_thread = "";
       this.form.retry_count = "";
       this.form.script_name = "";
     },
+    // 并发执行用例
+    concurrentExcution(){
+      axios.get(constant.baseURL+"case/concurrent/",{
+        params:{
+          project_id: this.pro_id
+        },
+        headers: {
+          Authorization: this.token,
+        },
+        responseType: "json",
+      }).then(response => {
+        confirm(response.data.msg)
+      })
+    }
   },
   computed: {
     // 文件上传路径
     upLoadUrl() {
-      return "http://127.0.0.1:8001/api/case/uploadScript/" + this.pro_id + "/";
+      return constant.baseURL+"case/uploadScript/" + this.pro_id + "/";
     },
   },
   watch: {
@@ -398,7 +433,7 @@ export default {
   mounted() {
     // 获取该用户下拥有权限的项目
     axios
-      .get("http://127.0.0.1:8001/api/project/", {
+      .get(constant.baseURL+"project/", {
         headers: {
           Authorization: this.token,
         },
