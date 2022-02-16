@@ -34,9 +34,11 @@
       <el-button
         size="small"
         style="margin-left: 10px"
-        @click="downloadClient"
-        >下载调试包</el-button
-      >
+        @click="uploadUtils"
+        >
+        更新调试包
+        </el-button>
+      
       <div style="float: right">
         执行路径：
         <el-select size="small" v-model="excuseHost" placeholder="请选择">
@@ -168,7 +170,7 @@
             :auto-upload="false"
             :limit="1"
             :on-exceed="handleExceed"
-            :file-list="fileList"
+            :file-list="utilsFileList"
             :headers="myHeader"
           >
             <el-button slot="trigger" size="small" type="success"
@@ -182,9 +184,7 @@
         <el-button type="danger" @click="isEdit = false">取 消</el-button>
       </div>
     </el-dialog>
-
-
-
+    <!-- 测试报告框 -->
     <el-dialog
       title="测试报告"
       :modal-append-to-body="false"
@@ -197,6 +197,7 @@
       
     </el-dialog>
 
+    <!-- 测试报告总结框 -->
     <el-dialog
       title="测试报告总结"
       :modal-append-to-body="false"
@@ -204,6 +205,44 @@
       width="30%"
     >
       <div style="text-align:center;font-size:16px" ref="reportSummary"></div>
+      
+    </el-dialog>
+
+    <!-- 调试包操作 -->
+    <el-dialog
+      title="调试包更新"
+      :modal-append-to-body="false"
+      :visible.sync="clientUpdate"
+      width="60%"
+    >
+      <div>
+        <div>
+          <h4>下载调试包:调试包中有对应的用例脚本模板,以及公用的工具包;工具包可进行更新</h4>
+          <el-button
+            size="small"
+            style="margin-left: 10px"
+            type="success"
+            ><span class="link-url" @click="downloadClient">点击下载调试包</span></el-button
+          >
+        </div>
+        <div>
+          <h4>更新工具包:可对public中的公用包进行更新,上传的文件须为python文件</h4>
+          <el-upload
+            class="upload-demo"
+            :action="uploadUtilsUrl"
+            multiple
+            :auto-upload="true"
+            :limit="3"
+            :before-upload="beforeUtilUpload"
+            :file-list="utilsFileList"
+            :headers="myHeader"
+          >
+            <el-button slot="trigger" size="small" type="success" style="margin-left: 10px"
+              >点击更新工具包</el-button
+            >
+      </el-upload>
+        </div>
+      </div>
       
     </el-dialog>
   </div>
@@ -218,9 +257,11 @@ export default {
   data() {
     return {
       cases: [],
+      // 编辑框
       isEdit: false,
-      isUpload: false,
+      // 新增框
       dialogFormVisible: false,
+      // 当前项目id
       pro_id: 0,
       form: {
         name: "",
@@ -236,24 +277,49 @@ export default {
         script_name: "",
         author: localStorage.getItem("UserId"),
       },
+      // 当前用户的项目列表
       authorProjectList: [],
+      // 上传的脚本列表
       fileList: [],
+      // 上传的工具类列表
+      utilsFileList: [],
+      // 上传的脚本名称
       fileName: "",
       token: localStorage.Authorization,
       myHeader: { Authorization: localStorage.Authorization },
-      excuseStatus: "执行",
+      // 全部项目与执行路径列表
       hostList: {},
+      // 当前项目的执行路径列表
       currentHostList: [],
+      // 当前执行路径
       excuseHost: "",
+      // 测试报告的内容
       htmlText: "",
+      // 测试报告
       isLookReport: false,
+      // 报告总结
       isLookReportSummary: false,
-      reportSummaryContent: ''
+      // 报告总结内容
+      reportSummaryContent: '',
+      // 调试包
+      clientUpdate: false
     };
   },
   methods: {
     handleSuccess(file) {
       this.fileList.splice(0, 1);
+    },
+    beforeUtilUpload(file) {
+      const isPY = file.type === 'text/x-python';
+      const isLt200k = file.size / 1024 / 1024 < 0.2;
+
+      if (!isPY) {
+        this.$message.error('上传工具类只能是python文件!');
+      }
+      if (!isLt200k) {
+        this.$message.error('上传工具类大小不能超过 200KB!');
+      }
+      return isPY && isLt200k;
     },
     beforeUpload(file) {
       this.form.script_name = file.name;
@@ -287,7 +353,6 @@ export default {
         responseType: "json",
       })
       .then((response) => {
-        console.log(response.data);
         this.dialogFormVisible = false;
         this.getCaseList(this.pro_id);
         this.resetForm();
@@ -355,8 +420,6 @@ export default {
     },
     // 执行用例
     excuseCase(excuse_case) {
-      // this.$refs.excuseBtn.textContent = "执行中";
-      console.log(this.$refs.excuseBtn);
       axios
         .get(constant.baseURL+"case/excuse/" + excuse_case.id + "/", {
           headers: {
@@ -419,6 +482,12 @@ export default {
             }
           });
     },
+    // 打开更新调试包并清空上传工具类列表
+    uploadUtils(){
+      this.utilsFileList.splice(0,3)
+      this.clientUpdate =true
+    },
+
     // 清空新增表单数据
     resetForm() {
       this.form.name = "";
@@ -451,12 +520,8 @@ export default {
         // alert(response.data.data)
         if(response.data.code === 1){
           this.isLookReportSummary = true
-          // this.reportSummaryContent = response.data.data
-          // var ele = document.createElement("html")
-          // ele.innerHTML = response.data.data
           this.$nextTick(() => {
             // 将js脚本内容插入到标签当中
-            console.log(this.$refs.reportSummary)
             this.$refs.reportSummary.innerHTML = response.data.data
           })
           
@@ -467,17 +532,16 @@ export default {
     },
     // 下载调试包
     downloadClient(){
-      axios.get(constant.baseURL+"case/downloadclient/" +this.pro_id+"/",{
-        headers: {
-          Authorization: this.token,
-        },
-      })
+      window.open(constant.baseURL+"case/downloadclient/45/")
     }
   },
   computed: {
     // 文件上传路径
     upLoadUrl() {
       return constant.baseURL+"case/uploadScript/" + this.pro_id + "/";
+    },
+    uploadUtilsUrl(){
+      return constant.baseURL+"case/uploadUtils/" + this.pro_id + "/";
     },
   },
   watch: {

@@ -4,6 +4,7 @@ import VueRouter from 'vue-router'
 
 import Project from '../pages/Project'
 import Case from '../pages/Case'
+import Task from '../pages/Task'
 import Login from '../components/Login'
 import Index from '../components/Index'
 import User from '../pages/User'
@@ -44,6 +45,11 @@ const Router = new VueRouter({
 					path: 'element',
 					component: Element
 				},
+				{
+					name: 'task',
+					path: 'task',
+					component: Task
+				}
 			]
 		},
 		{
