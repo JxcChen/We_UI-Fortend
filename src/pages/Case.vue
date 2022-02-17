@@ -38,7 +38,14 @@
         >
         更新调试包
         </el-button>
-      
+      <el-button
+        size="small"
+        style="margin-left: 10px"
+        @click="intoSetAutoTask"
+        >
+        自动化任务设置
+        </el-button>
+
       <div style="float: right">
         执行路径：
         <el-select size="small" v-model="excuseHost" placeholder="请选择">
@@ -58,8 +65,8 @@
       <el-table-column prop="name" label="用例名称" >
       </el-table-column>
       <el-table-column prop="script_name" label="脚本名称"> </el-table-column>
-      <el-table-column prop="is_threads" label="是否并发" >
-      </el-table-column>
+      <el-table-column prop="is_threads" label="是否并发" ></el-table-column>
+      <el-table-column prop="is_auto_excuse" label="是否自动执行" ></el-table-column>
       <el-table-column fixed="right" label="操作" >
         <template slot-scope="scope">
           <el-button
@@ -100,12 +107,16 @@
         <el-form-item label="用例名称" style="margin-top: 20px">
           <el-input v-model="form.name" style="width: 350px"></el-input>
         </el-form-item>
+        <el-form-item label="重试次数">
+          <el-input v-model="form.retry_count" style="width: 350px"> </el-input>
+        </el-form-item>
         <el-form-item label="是否并发">
           <el-radio v-model="form.is_thread" label="1">是</el-radio>
           <el-radio v-model="form.is_thread" label="2">否</el-radio>
         </el-form-item>
-        <el-form-item label="重试次数">
-          <el-input v-model="form.retry_count" style="width: 350px"> </el-input>
+        <el-form-item label="是否自动执行">
+            <el-radio v-model="form.is_auto_excuse" label="1">是</el-radio>
+            <el-radio v-model="form.is_auto_excuse" label="0">否</el-radio>
         </el-form-item>
         <el-form-item label="用例脚本">
           <el-upload
@@ -134,7 +145,7 @@
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button type="primary" @click="addCase">确 定</el-button>
-        <el-button type="danger" @click="dialogFormVisible = false"
+        <el-button type="danger" @click="cancleAddCase"
           >取 消</el-button
         >
       </div>
@@ -150,13 +161,17 @@
         <el-form-item label="用例名称" style="margin-top: 20px">
           <el-input v-model="edit_form.name" style="width: 350px"></el-input>
         </el-form-item>
+        <el-form-item label="重试次数">
+          <el-input v-model="edit_form.retry_count" style="width: 350px">
+          </el-input>
+        </el-form-item>
         <el-form-item label="是否并发">
           <el-radio v-model="edit_form.is_thread" label="1">是</el-radio>
           <el-radio v-model="edit_form.is_thread" label="2">否</el-radio>
         </el-form-item>
-        <el-form-item label="重试次数">
-          <el-input v-model="edit_form.retry_count" style="width: 350px">
-          </el-input>
+        <el-form-item label="是否自动执行">
+            <el-radio v-model="edit_form.is_auto_excuse" label="1">是</el-radio>
+            <el-radio v-model="edit_form.is_auto_excuse" label="0">否</el-radio>
         </el-form-item>
         <el-form-item label="用例脚本">
           <el-upload
@@ -245,6 +260,42 @@
       </div>
       
     </el-dialog>
+
+
+    <!-- 自动化任务设置框 -->
+    <el-dialog
+      title="自动化任务设置"
+      :modal-append-to-body="false"
+      :visible.sync="isSetAuto"
+      width="40%"
+    >
+
+    <el-form :model="autoTask" label-position="right" label-width="120px">
+        <el-form-item label="是否开启" style="margin-top: 20px">
+          <el-switch
+            v-model="autoTask.autoSwitch"
+            active-color="#13ce66"
+            inactive-color="#ff4949">
+          </el-switch>
+        </el-form-item>
+        <el-form-item label=" 设置执行时间">
+          <el-time-select
+            v-model="autoTask.autoExcuseTime"
+            :picker-options="{
+              start: '00:00',
+              step: '00:15',
+              end: '23:59'
+            }"
+            placeholder="选择时间">
+          </el-time-select>
+        </el-form-item>
+
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="openOrCloseTask">确 定</el-button>
+        <el-button type="danger" @click="cancleSetAuto">取 消</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -261,6 +312,21 @@ export default {
       isEdit: false,
       // 新增框
       dialogFormVisible: false,
+      // 自动化设置框
+      isSetAuto: false,
+      autoTask:{
+        // 自动化开关
+        autoSwitch: false,
+        // 自动化执行时间
+        autoExcuseTime: ''
+      },
+      // 保存自动化设置框编辑前的状态
+      autoTaskStatus:{
+        // 自动化开关
+        autoSwitch: false,
+        // 自动化执行时间
+        autoExcuseTime: ''
+      },
       // 当前项目id
       pro_id: 0,
       form: {
@@ -269,6 +335,7 @@ export default {
         retry_count: "",
         script_name: "",
         author: localStorage.getItem("UserId"),
+        is_auto_excuse: "1"
       },
       edit_form: {
         name: "",
@@ -276,6 +343,7 @@ export default {
         retry_count: "",
         script_name: "",
         author: localStorage.getItem("UserId"),
+        is_auto_excuse: ""
       },
       // 当前用户的项目列表
       authorProjectList: [],
@@ -358,6 +426,11 @@ export default {
         this.resetForm();
       });
     },
+    // 取消新增用例
+    cancleAddCase(){
+      this.dialogFormVisible = false
+      this.resetForm();
+    },
     // 获取对应项目下的所有用例
     getCaseList(pro_id) {
       axios
@@ -376,6 +449,9 @@ export default {
             c["is_thread"] === 1
               ? (c["is_threads"] = "是")
               : (c["is_threads"] = "否");
+            c["is_auto_excuse"] === 1
+            ? (c["is_auto_excuse"] = "是")
+            : (c["is_auto_excuse"] = "否");
           });
           this.cases = response.data.data;
         });
@@ -391,6 +467,12 @@ export default {
       } else {
         edit_case["is_thread"] = "2";
       }
+      if (edit_case.is_auto_excuse === "是") {
+        edit_case["is_auto_excuse"] = "1";
+      } else {
+        edit_case["is_auto_excuse"] = "0";
+      }
+      console.log(edit_case)
       this.edit_form = { ...this.edit_form, ...edit_case };
       delete this.edit_form.is_threads;
       this.isEdit = true;
@@ -491,7 +573,8 @@ export default {
     // 清空新增表单数据
     resetForm() {
       this.form.name = "";
-      this.form.is_thread = "";
+      this.form.is_thread = "1";
+      this.form.is_auto_excuse = "1";
       this.form.retry_count = "";
       this.form.script_name = "";
     },
@@ -499,7 +582,8 @@ export default {
     concurrentExcution(){
       axios.get(constant.baseURL+"case/concurrent/",{
         params:{
-          project_id: this.pro_id
+          project_id: this.pro_id,
+          host: this.excuseHost,
         },
         headers: {
           Authorization: this.token,
@@ -533,6 +617,29 @@ export default {
     // 下载调试包
     downloadClient(){
       window.open(constant.baseURL+"case/downloadclient/45/")
+    },
+    //进入自动化任务设置编辑框
+    intoSetAutoTask(){
+      this.autoTaskStatus = {...this.autoTaskStatus,...this.autoTask}
+      this.isSetAuto = true
+    },
+    cancleSetAuto(){
+      this.autoTask = {...this.autoTask,...this.autoTaskStatus}
+      this.isSetAuto = false
+    },
+    openOrCloseTask(){
+      if(this.autoTask.autoSwitch){
+        axios.get(constant.baseURL+"case/openMonitor/" +this.pro_id+"/",{
+          headers: {
+            Authorization: this.token,
+          },
+          responseType: "json",
+        }).then(response => {
+          // alert(response.data.data)
+          this.isSetAuto = false
+          this.$message(response.data.msg)
+        })
+      }
     }
   },
   computed: {

@@ -14,7 +14,7 @@
           >
             <el-menu-item disabled>WE-UI</el-menu-item>
             <el-menu-item index="case">用例管理</el-menu-item>
-            <el-menu-item index="task">任务管理</el-menu-item>
+            <!-- <el-menu-item index="task">任务管理</el-menu-item> -->
             <el-menu-item index="user">人员管理</el-menu-item>
             <el-submenu index="4">
               <template slot="title">元素库管理</template>
