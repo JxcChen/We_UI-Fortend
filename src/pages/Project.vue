@@ -123,6 +123,7 @@
 
 <script>
 import axios from "axios";
+import {mapState,mapMutations} from 'vuex';
 axios.defaults.withCredentials = true;
 export default {
   name: "Project",
@@ -152,14 +153,18 @@ export default {
       // 是否处于配置协作人员
       setMember: false,
       // 用户列表
-      users: [],
+      // users: [],
       // 协作人员的列表
       teamMembers: [],
       // 设置协作人员的项目id
       setTeamProjectId: 0
     };
   },
+  computed:{
+    ...mapState(['users']),
+  },
   methods: {
+    ...mapMutations(['getUserList']),
     addProject() {
       const addProjectData = this.form;
       axios
@@ -246,19 +251,19 @@ export default {
           });
       }
     },
-    getUserList() {
-      axios
-        .get("http://127.0.0.1:8001/api/user/", {
-          headers: {
-            Authorization: this.token,
-          },
-          responseType: "json",
-        })
-        .then((response) => {
-          this.users = response.data.data.filter(user => user.id != localStorage.UserId)
-        });
-    },
-    // 获取项目已有的写作人员列表
+    // getUserList() {
+    //   axios
+    //     .get("http://127.0.0.1:8001/api/user/", {
+    //       headers: {
+    //         Authorization: this.token,
+    //       },
+    //       responseType: "json",
+    //     })
+    //     .then((response) => {
+    //       this.users = response.data.data.filter(user => user.id != localStorage.UserId)
+    //     });
+    // },
+    // 获取项目已有的协作人员列表
     getTeamMembersList(project_id){
       axios.get("http://127.0.0.1:8001/api/teamMember/",{
         headers: {
@@ -278,7 +283,8 @@ export default {
       this.getTeamMembersList(project.id)
       this.setTeamProjectId = project.id
       // 获取所有人员列表
-      this.getUserList()
+      this.getUserList('except_current')
+      console.log(this.users)
       this.setMember = true
     },
     setTeamMember(){
@@ -299,6 +305,7 @@ export default {
       this.form.auto_host = "";
     },
   },
+  
   mounted() {
     this.getProjectList();
   },

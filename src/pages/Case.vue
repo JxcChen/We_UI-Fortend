@@ -270,31 +270,69 @@
       width="40%"
     >
 
-    <el-form :model="autoTask" label-position="right" label-width="120px">
-        <el-form-item label="是否开启" style="margin-top: 20px">
-          <el-switch
-            v-model="autoTask.autoSwitch"
-            active-color="#13ce66"
-            inactive-color="#ff4949">
-          </el-switch>
-        </el-form-item>
-        <el-form-item label=" 设置执行时间">
-          <el-time-select
-            v-model="autoTask.autoExcuseTime"
-            :picker-options="{
-              start: '00:00',
-              step: '00:15',
-              end: '23:59'
-            }"
-            placeholder="选择时间">
-          </el-time-select>
-        </el-form-item>
+    <el-tabs v-model="activeName" @tab-click="handleClick">
+      <el-tab-pane label="任务配置" name="first">
+        <el-form :model="autoTask" label-position="right" label-width="120px">
+          <el-form-item label="是否开启" style="margin-top: 20px">
+            <el-switch
+              v-model="autoTask.autoSwitch"
+              active-color="#13ce66"
+              inactive-color="#ff4949">
+            </el-switch>
+          </el-form-item>
+          
+          <el-form-item label=" 设置执行时间">
+            <el-time-select
+              v-model="autoTask.autoExcuseTime"
+              :picker-options="{
+                start: '00:00',
+                step: '00:15',
+                end: '23:59'
+              }"
+              placeholder="选择时间">
+            </el-time-select>
+          </el-form-item>
+          
+        </el-form>
+        <div align='center'>
+          <el-button type="primary" @click="openOrCloseTask">确 定</el-button>
+          <el-button type="danger" @click="cancleSetAuto">取 消</el-button>
+        </div>
+        </el-tab-pane>
+        <el-tab-pane label="通知配置" name="second">
+          <h4>配置任务通知</h4>
+          <div>
+            选择通知方式: 
+            <el-select size="small" v-model="sendType" placeholder="请选择通知方式">
+              <el-option
+                v-for="item in typeList"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              >
+              </el-option>
+            </el-select>
+            &nbsp&nbsp
+            <span v-show="sendType==1">选择通知人员: 
+              <el-select size="small" v-model="sendUserList" multiple placeholder="请选择">
+                <el-option
+                  v-for="u in users"
+                  :key="u.id"
+                  :label="u.username"
+                  :value="u.id"
+                >
+                </el-option>
+              </el-select>
+            </span>
 
-      </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="openOrCloseTask">确 定</el-button>
-        <el-button type="danger" @click="cancleSetAuto">取 消</el-button>
-      </div>
+            <span v-show="sendType==2">请输入webhook地址: 
+              <el-input v-model="edit_form.retry_count" size="small" style="width: 250px"></el-input>
+            </span>
+          </div>
+          
+          
+        </el-tab-pane>
+      </el-tabs>
     </el-dialog>
   </div>
 </template>
@@ -302,12 +340,20 @@
 <script>
 import axios from "axios";
 import constant from "../constant/constant"
+import {mapState,mapMutations} from 'vuex';
 axios.defaults.withCredentials = true;
 export default {
   name: "Project",
   data() {
     return {
+      // 自动化任务任务设置默认选项
+      activeName: 'first',
+      sendType: '1',
+      typeList:[{value:'1',label:'邮箱'},{value:'2',label:'企业微信'}],
+      // 用例列表
       cases: [],
+      // 邮箱收件人列表
+      sendUserList:[],
       // 编辑框
       isEdit: false,
       // 新增框
@@ -374,6 +420,9 @@ export default {
     };
   },
   methods: {
+    handleClick(tab, event) {
+        
+    },
     handleSuccess(file) {
       this.fileList.splice(0, 1);
     },
@@ -620,6 +669,18 @@ export default {
     },
     //进入自动化任务设置编辑框
     intoSetAutoTask(){
+      axios.get(constant.baseURL+"project/"+this.pro_id+"/",{
+        headers: {
+          Authorization: this.token,
+        },
+        responseType: "json",
+      }).then(response=>{
+        const res_data = response.data.data
+        this.autoTask.autoSwitch = res_data['is_auto'] == 1 ? true : false
+        this.autoTask.autoExcuseTime = res_data['excuse_time']
+      })
+      // 获取所有人员
+      this.getUserList('all')
       this.autoTaskStatus = {...this.autoTaskStatus,...this.autoTask}
       this.isSetAuto = true
     },
@@ -627,6 +688,7 @@ export default {
       this.autoTask = {...this.autoTask,...this.autoTaskStatus}
       this.isSetAuto = false
     },
+    // 开启或关闭自动化任务
     openOrCloseTask(){
       if(this.autoTask.autoSwitch){
         axios.get(constant.baseURL+"case/openMonitor/" +this.pro_id+"/",{
@@ -634,13 +696,27 @@ export default {
             Authorization: this.token,
           },
           responseType: "json",
+          params: {
+            excuse_time: this.autoTask.autoExcuseTime,
+          },
         }).then(response => {
           // alert(response.data.data)
           this.isSetAuto = false
           this.$message(response.data.msg)
         })
+      }else{
+        axios.delete(constant.baseURL+"case/openMonitor/" +this.pro_id+"/",{
+          headers: {
+            Authorization: this.token,
+          },
+          responseType: "json",
+        }).then(response => {
+          this.isSetAuto = false
+          this.$message(response.data.msg)
+        })
       }
-    }
+    },
+    ...mapMutations(['getUserList'])
   },
   computed: {
     // 文件上传路径
@@ -650,6 +726,7 @@ export default {
     uploadUtilsUrl(){
       return constant.baseURL+"case/uploadUtils/" + this.pro_id + "/";
     },
+    ...mapState(['users'])
   },
   watch: {
     pro_id(newValue, oleValue) {
