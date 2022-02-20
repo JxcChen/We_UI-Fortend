@@ -28,14 +28,14 @@
       <el-col :span="6">
         <div class="grid-content bg-purple" style="background-color: #0074d9">
           <span style="color: #fbfdff">当前用户：</span>&nbsp
-          <el-dropdown style="margin-top: 15px; margin-right: 20px">
+          <el-dropdown style="margin-top: 15px; margin-right: 20px" @command="handleCommand">
             <span class="el-dropdown-link">
               <i class="el-icon-user-solid"></i> {{ username
               }}<i class="el-icon-arrow-down el-icon--right"></i>
             </span>
             <el-dropdown-menu slot="dropdown">
-              <el-dropdown-item>修改密码</el-dropdown-item>
-              <el-dropdown-item>退出</el-dropdown-item>
+              <el-dropdown-item command="1">修改密码</el-dropdown-item>
+              <el-dropdown-item command="2">退出</el-dropdown-item>
             </el-dropdown-menu>
           </el-dropdown>
         </div>
@@ -54,6 +54,15 @@ export default {
       circleUrl:
         "https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png",
     };
+  },
+  methods:{
+    handleCommand(command){
+      if(command === "2"){
+        localStorage.clear();
+        this.$router.push("/login");
+      }
+      
+    }
   },
   computed: {
     username() {

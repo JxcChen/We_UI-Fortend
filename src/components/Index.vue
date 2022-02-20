@@ -3,9 +3,8 @@
         
         <el-header style="text-align: right; font-size: 12px">
             <template >
-            <Navigation></Navigation>
+              <Navigation></Navigation>
             </template>
-            
         </el-header>
         
         <el-main style="width: 1800px;margin-left:auto;margin-right:auto;" >

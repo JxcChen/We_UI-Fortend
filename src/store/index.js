@@ -1,6 +1,6 @@
 import Vuex from 'vuex'
 import Vue from 'vue'
-import axios from 'axios';
+import axios from '../api/http';
 
 Vue.use(Vuex)
 
@@ -10,15 +10,7 @@ const actions = {
 
 const mutations = {
     // 将登录态存到本地
-    changeLogin(state,user){
-        state.Authorization = user.Authorization
-        localStorage.setItem('Authorization',user.Authorization)
-        localStorage.setItem('User',user.name)
-        localStorage.setItem('UserId',user.id)
-        state.isLogin = true
-    },
     getUserList(state,type){
-        console.log(type)
         axios
         .get("http://127.0.0.1:8001/api/user/", {
           headers: {
@@ -28,10 +20,18 @@ const mutations = {
         })
         .then((response) => {
             if(type === 'except_current'){
-                
                 state.users = response.data.data.filter(user => user.id != localStorage.UserId)
             }else if(type === 'all'){
                 state.users = response.data.data
+            }else if(type === 'userShow'){
+                response.data.data.forEach(user => {
+                    if(user['is_superuser']){
+                      user['user_type'] = '超级管理员'
+                    }else{
+                      user['user_type'] = '普通用户'
+                    }
+                  })
+                  state.users = response.data.data
             }
           
         });
@@ -40,9 +40,7 @@ const mutations = {
 }
 
 const state = {
-    // 登录态储存信息
-    Authorization : localStorage.getItem('Authorization') ? localStorage.getItem('Authorization') : '',
-    isLogin: false,
+    // 用户列表
     users:[]
 }
 

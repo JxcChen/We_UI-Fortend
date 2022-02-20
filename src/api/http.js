@@ -1,13 +1,13 @@
 import axios from "axios";
 import {Message} from 'element-ui'
 import router from '../router'
+axios.defaults.withCredentials = true;
 // var api = "http://stuq.ceshiren.com:8089"
 var api = "http://127.0.0.1:8001/api/"
 var messageInstance = null
 var instance = axios.create({
     headers:{
         'Content-Type':'application/json',
-        "responseType": "json"
     },
     baseURL:api,
     timeout:100000,
@@ -44,6 +44,7 @@ instance.interceptors.response.use(res=>{
     error=>{
         const {response} = error
         if(response.status==401){
+            console.log(response.status)
             if (messageInstance) {
                 messageInstance.close();
               }
@@ -53,7 +54,7 @@ instance.interceptors.response.use(res=>{
                 center:true
             })
             router.replace({
-                path:'/',
+                path:'/login',
                 query:{
                     // 进行重定向
                     redirect:router.currentRoute.fullPath

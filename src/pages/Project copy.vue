@@ -168,6 +168,12 @@ export default {
     ...mapMutations(['getUserList']),
     addProject() {
       const addProjectData = this.form;
+      // axios
+      //   .post("http://127.0.0.1:8001/api/project/", addProjectData, {
+      //     headers: {
+      //       Authorization: this.token,
+      //     },
+      //   })
       project.addProject(addProjectData)
         .then((response) => {
           if (response.data.code === 1) {
@@ -183,6 +189,16 @@ export default {
         });
     },
     getProjectList() {
+      // axios
+      //   .get("http://127.0.0.1:8001/api/project/", {
+      //     headers: {
+      //       Authorization: this.token,
+      //     },
+      //     responseType: "json",
+      //     params: {
+      //       user_id: localStorage.getItem("UserId"),
+      //     },
+      //   })
       project.getProjectList()
         .then((response) => {
           this.projects = response.data.data.res_pro_list;
@@ -197,6 +213,17 @@ export default {
       this.isEdit = true;
     },
     editProject() {
+      // axios
+      //   .put(
+      //     "http://127.0.0.1:8001/api/project/" + this.edit_form.id + "/",
+      //     this.edit_form,
+      //     {
+      //       headers: {
+      //         Authorization: this.token,
+      //       },
+      //       responseType: "json",
+      //     }
+      //   )
       project.editProject(this.edit_form.id,this.edit_form)
         .then((response) => {
           if (response.data.code == 1) {
@@ -213,6 +240,13 @@ export default {
     deleteProject(del_project) {
       const isDel = confirm("确定要删除该项目吗");
       if (isDel) {
+        // axios
+        //   .delete("http://127.0.0.1:8001/api/project/" + project.id + "/", {
+        //     headers: {
+        //       Authorization: this.token,
+        //     },
+        //     responseType: "json",
+        //   })
         project.deleteProject(del_project.id)
           .then((response) => {
             this.$message(response.data.msg);
@@ -224,6 +258,15 @@ export default {
     },
     // 获取项目已有的协作人员列表
     getTeamMembersList(project_id){
+      // axios.get("http://127.0.0.1:8001/api/teamMember/",{
+      //   headers: {
+      //     Authorization: this.token,
+      //   },
+      //   responseType: "json",
+      //   params:{
+      //     project_id: project_id
+      //   }
+      // })
       project.getTeamMembersList(project_id).then((response) => {
         this.teamMembers = response.data.data
       })
@@ -240,6 +283,12 @@ export default {
     },
     setTeamMember(){
       const request_data = {users:this.teamMembers,project_id:this.setTeamProjectId}
+      // axios.post("http://127.0.0.1:8001/api/teamMember/",request_data,{
+      //   headers: {
+      //     Authorization: this.token,
+      //   },
+      //   responseType: "json",
+      // })
       project.setTeamMember(request_data).then((response) => {
         this.setMember=false
       })

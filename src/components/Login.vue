@@ -68,11 +68,10 @@ export default {
         axios
           .post("http://127.0.0.1:8001/api/login/", loginData)
           .then((response) => {
-            this.changeLogin({
-              Authorization: "JWT " + response.data.token,
-              name: response.data.username,
-              id: response.data.id,
-            });
+            // 将认证信息放置localStorage
+            localStorage.setItem('Authorization',"JWT " + response.data.token)
+            localStorage.setItem('User',response.data.username)
+            localStorage.setItem('UserId',response.data.id)
             this.$router.push("/");
           });
       }
@@ -81,7 +80,7 @@ export default {
   computed: {
     bgI() {
       return {
-        backgroundImage: "url(" + require("../assets/login.png") + ")",
+        backgroundImage: "url(" + require("../../public/static/login.png") + ")",
         backgroundSize: "cover",
         backgroundRepeat: "no-repeat",
         backgroundPosition: "center center",

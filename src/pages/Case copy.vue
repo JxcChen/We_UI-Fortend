@@ -15,32 +15,32 @@
 
       <el-button
         size="small"
-        class="my_btn"
+        style="margin-left: 10px"
         @click="concurrentExcution"
         >并发执行</el-button
       >
       <el-button
         size="small"
-        class="my_btn"
+        style="margin-left: 10px"
         @click="lookReportSummary"
         >查看报告总结</el-button
       >
       <el-button
         size="small"
-        class="my_btn"
+        style="margin-left: 10px"
         @click="dialogFormVisible = true"
         >新增用例</el-button
       >
       <el-button
         size="small"
-        class="my_btn"
+        style="margin-left: 10px"
         @click="uploadUtils"
         >
         更新调试包
         </el-button>
       <el-button
         size="small"
-        class="my_btn"
+        style="margin-left: 10px"
         @click="intoSetAutoTask"
         >
         自动化任务设置
@@ -468,6 +468,13 @@ export default {
       addCaseData["project_id"] = this.pro_id;
       // 上传脚本文件
       this.submitUpload();
+      // axios
+      // .post(constant.baseURL+"case/", addCaseData, {
+      //   headers: {
+      //     Authorization: this.token,
+      //   },
+      //   responseType: "json",
+      // })
       tcase.addCase(addCaseData)
       .then((response) => {
         this.dialogFormVisible = false;
@@ -482,6 +489,16 @@ export default {
     },
     // 获取对应项目下的所有用例
     getCaseList(pro_id) {
+      // axios
+      //   .get(constant.baseURL+"case/", {
+      //     headers: {
+      //       Authorization: this.token,
+      //     },
+      //     responseType: "json",
+      //     params: {
+      //       pro_id: pro_id,
+      //     },
+      //   })
       tcase.getCaseList(pro_id)
         .then((response) => {
           // 将并发以是否进行展示
@@ -520,6 +537,17 @@ export default {
     // 修改用例
     editCase() {
       this.submitUpload();
+      // axios
+      //   .put(
+      //     constant.baseURL+"case/" + this.edit_form.id + "/",
+      //     this.edit_form,
+      //     {
+      //       headers: {
+      //         Authorization: this.token,
+      //       },
+      //       responseType: "json",
+      //     }
+      //   )
         tcase.editCase(this.edit_form.id,this.edit_form)
         .then((response) => {
           if (response.data.code == 1) {
@@ -533,6 +561,16 @@ export default {
     },
     // 执行用例
     excuseCase(excuse_case) {
+      // axios
+      //   .get(constant.baseURL+"case/excuse/" + excuse_case.id + "/", {
+      //     headers: {
+      //       Authorization: this.token,
+      //     },
+      //     responseType: "json",
+      //     params: {
+      //       host: this.excuseHost,
+      //     },
+      //   })
       tcase.excuseCase(excuse_case.id,this.excuseHost)
         .then((response) => {
           this.$message(response.data.msg);
@@ -542,6 +580,13 @@ export default {
     deleteCase(del_case) {
       const isDel = confirm("确定要删除该项目吗");
       if (isDel) {
+        // axios
+        //   .delete(constant.baseURL+"case/" + del_case.id + "/", {
+        //     headers: {
+        //       Authorization: this.token,
+        //     },
+        //     responseType: "json",
+        //   })
         tcase.deleteCase(del_case.id)
           .then((response) => {
             this.$message(response.data.msg);
@@ -596,6 +641,16 @@ export default {
     },
     // 并发执行用例
     concurrentExcution(){
+      // axios.get(constant.baseURL+"case/concurrent/",{
+        // params:{
+        //   project_id: this.pro_id,
+        //   host: this.excuseHost,
+        // },
+      //   headers: {
+      //     Authorization: this.token,
+      //   },
+      //   responseType: "json",
+      // })
       let param = {
           project_id: this.pro_id,
           host: this.excuseHost,
@@ -607,6 +662,12 @@ export default {
     },
     // 查看项目报告总结
     lookReportSummary(){
+      // axios.get(constant.baseURL+"case/reportsummary/" +this.pro_id+"/",{
+      //   headers: {
+      //     Authorization: this.token,
+      //   },
+      //   responseType: "json",
+      // })
       tcase.lookReportSummary(this.pro_id).then(response => {
         if(response.data.code === 1){
           this.isLookReportSummary = true
@@ -625,12 +686,25 @@ export default {
     },
     //进入自动化任务设置编辑框
     intoSetAutoTask(){
+      // 获取开关状态及执行时间
+      // axios.get(constant.baseURL+"project/"+this.pro_id+"/",{
+      //   headers: {
+      //     Authorization: this.token,
+      //   },
+      //   responseType: "json",
+      // })
       tcase.getProjectDetail(this.pro_id).then(response=>{
         const res_data = response.data.data
         this.autoTask.autoSwitch = res_data['is_auto'] == 1 ? true : false
         this.autoTask.autoExcuseTime = res_data['excuse_time']
       })
       // 获取已配置的任务通知
+      // axios.get(constant.baseURL+"notice/"+this.pro_id+"/",{
+      //   headers: {
+      //     Authorization: this.token,
+      //   },
+      //   responseType: "json",
+      // })
       tcase.getProjectNotice(this.pro_id).then(response=>{
         const res_data = response.data.data
         this.sendType = res_data['notice_type']+''
@@ -655,6 +729,15 @@ export default {
     // 开启或关闭自动化任务
     openOrCloseTask(){
       if(this.autoTask.autoSwitch){
+        // axios.get(constant.baseURL+"case/openMonitor/" +this.pro_id+"/",{
+        //   headers: {
+        //     Authorization: this.token,
+        //   },
+        //   responseType: "json",
+          // params: {
+          //   excuse_time: this.autoTask.autoExcuseTime,
+          // },
+        // })
         const param =  {excuse_time: this.autoTask.autoExcuseTime}
         tcase.openAutoTask(this.pro_id,param).then(response => {
           // alert(response.data.data)
@@ -662,6 +745,12 @@ export default {
           this.$message(response.data.msg)
         })
       }else{
+        // axios.delete(constant.baseURL+"case/openMonitor/" +this.pro_id+"/",{
+        //   headers: {
+        //     Authorization: this.token,
+        //   },
+        //   responseType: "json",
+        // })
         tcase.closeAutoTask(this.pro_id).then(response => {
           this.isSetAuto = false
           this.$message(response.data.msg)
@@ -692,6 +781,13 @@ export default {
         requestData['notice_type'] = 2
         requestData['webhook'] = this.webhook
       }
+      // 发起请求
+      // axios.post(constant.baseURL+"notice/",requestData,{
+      //   headers: {
+      //       Authorization: this.token,
+      //   },
+      //   responseType: "json",
+      // })
       tcase.addNotice(requestData).then(res=>{
         this.$message(res.data.msg)
         this.isSetAuto = false
@@ -717,6 +813,17 @@ export default {
     },
   },
   mounted() {
+    // 获取该用户下拥有权限的项目
+    // axios
+    //   .get(constant.baseURL+"project/", {
+    //     headers: {
+    //       Authorization: this.token,
+    //     },
+    //     responseType: "json",
+    //     params: {
+    //       user_id: localStorage.getItem("UserId"),
+    //     },
+    //   })
     tcase.getUserProjectList()
       .then((response) => {
         response.data.data.res_pro_list.forEach((pro) => {
@@ -734,8 +841,5 @@ export default {
 };
 </script>
 
-<style scoped>
-  .my_btn{
-    margin-left: 10px
-  }
+<style>
 </style>
