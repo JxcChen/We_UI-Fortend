@@ -35,13 +35,17 @@ const mutations = {
             }
           
         });
+    },
+    changePassword(state){
+        state.isChangePassword =true
     }
 
 }
 
 const state = {
     // 用户列表
-    users:[]
+    users:[],
+    isChangePassword:false
 }
 
 

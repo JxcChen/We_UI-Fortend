@@ -45,6 +45,7 @@
 </template>
 
 <script>
+import mapMutations from 'vuex'
 export default {
   name: "Navigation",
   data() {
@@ -56,13 +57,17 @@ export default {
     };
   },
   methods:{
+    
     handleCommand(command){
       if(command === "2"){
         localStorage.clear();
         this.$router.push("/login");
+      }else if(command === "1"){
+        this.changePassword()
       }
       
-    }
+    },
+    
   },
   computed: {
     username() {
