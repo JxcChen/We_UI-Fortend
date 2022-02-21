@@ -103,22 +103,25 @@
       :visible.sync="dialogFormVisible"
       width="30%"
     >
-      <el-form :model="form" label-position="right" label-width="120px">
-        <el-form-item label="用例名称" style="margin-top: 20px">
-          <el-input v-model="form.name" style="width: 350px"></el-input>
+      <el-form :model="form" label-position="right" label-width="120px" :rules="rules">
+        <el-form-item label="用例名称" style="margin-top: 20px"  prop="name">
+          <el-input v-model="form.name" style="width: 250px" placeholder="请输入用例名称" ></el-input>
         </el-form-item>
         <el-form-item label="重试次数">
-          <el-input v-model="form.retry_count" style="width: 350px"> </el-input>
+          <el-input v-model="form.retry_count" style="width: 250px" 
+            placeholder="请输入重试次数 最大为5" 
+            oninput="value=value.replace(/[^\d]/g,'');if(value>5)value=5;if(value<0)value=0" >
+          </el-input>
         </el-form-item>
-        <el-form-item label="是否并发">
+        <el-form-item label="是否并发" :required="true">
           <el-radio v-model="form.is_thread" label="1">是</el-radio>
           <el-radio v-model="form.is_thread" label="2">否</el-radio>
         </el-form-item>
-        <el-form-item label="是否自动执行">
+        <el-form-item label="是否自动执行" :required="true">
             <el-radio v-model="form.is_auto_excuse" label="1">是</el-radio>
             <el-radio v-model="form.is_auto_excuse" label="0">否</el-radio>
         </el-form-item>
-        <el-form-item label="用例脚本">
+        <el-form-item label="用例脚本" :required="true">
           <el-upload
             ref="uploadFile"
             class="upload-demo"
@@ -157,19 +160,22 @@
       :modal-append-to-body="false"
       width="30%"
     >
-      <el-form :model="edit_form" label-position="right" label-width="120px">
-        <el-form-item label="用例名称" style="margin-top: 20px">
-          <el-input v-model="edit_form.name" style="width: 350px"></el-input>
+      <el-form :model="edit_form" label-position="right" label-width="120px" :rules="rules" >
+        <el-form-item label="用例名称" style="margin-top: 20px" prop="name">
+          <el-input v-model="edit_form.name" style="width: 250px"></el-input>
         </el-form-item>
         <el-form-item label="重试次数">
-          <el-input v-model="edit_form.retry_count" style="width: 350px">
+          <el-input v-model="edit_form.retry_count" style="width: 250px"
+            placeholder="请输入重试次数 最大为5" 
+            oninput="value=value.replace(/[^\d]/g,'');if(value>5)value=5;if(value<0)value=0" >
+          >
           </el-input>
         </el-form-item>
-        <el-form-item label="是否并发">
+        <el-form-item label="是否并发" :required="true">
           <el-radio v-model="edit_form.is_thread" label="1">是</el-radio>
           <el-radio v-model="edit_form.is_thread" label="2">否</el-radio>
         </el-form-item>
-        <el-form-item label="是否自动执行">
+        <el-form-item label="是否自动执行" :required="true">
             <el-radio v-model="edit_form.is_auto_excuse" label="1">是</el-radio>
             <el-radio v-model="edit_form.is_auto_excuse" label="0">否</el-radio>
         </el-form-item>
@@ -192,6 +198,7 @@
               >选择脚本文件</el-button
             >
           </el-upload>
+          
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -383,10 +390,13 @@ export default {
       form: {
         name: "",
         is_thread: "1",
-        retry_count: "",
+        retry_count: 0,
         script_name: "",
         author: localStorage.getItem("UserId"),
         is_auto_excuse: "1"
+      },
+      rules:{
+        name :[{required: true, message: '用例名称不能为空', trigger: 'blur'}],
       },
       edit_form: {
         name: "",
@@ -464,10 +474,12 @@ export default {
     },
     // 添加用例
     addCase() {
+      if(this.form['name']===''){
+        return
+      }
       let addCaseData = this.form;
       addCaseData["project_id"] = this.pro_id;
       // 上传脚本文件
-      this.submitUpload();
       tcase.addCase(addCaseData)
       .then((response) => {
         this.dialogFormVisible = false;
@@ -519,6 +531,9 @@ export default {
     },
     // 修改用例
     editCase() {
+      if(this.edit_form.name==''){
+        return
+      }
       this.submitUpload();
         tcase.editCase(this.edit_form.id,this.edit_form)
         .then((response) => {
@@ -689,8 +704,14 @@ export default {
         }
         
       }else{
+        const webhook = this.webhook.trim()
+        console.log(webhook)
+        if(!webhook){
+          this.$message.error('请输入webhook地址')
+          return
+        }
         requestData['notice_type'] = 2
-        requestData['webhook'] = this.webhook
+        requestData['webhook'] = webhook
       }
       tcase.addNotice(requestData).then(res=>{
         this.$message(res.data.msg)

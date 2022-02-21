@@ -25,16 +25,7 @@
               <a href="#" class="fa fa-question-circle"></a>
             </div>
             <div class="form-group">
-              <div class="main-checkbox">
-                <input
-                  type="checkbox"
-                  value="None"
-                  id="checkbox1"
-                  name="check"
-                />
-                <label for="checkbox1"></label>
-              </div>
-              <span class="text">Remember me</span>
+
               <button class="btn btn-default" @click="login">登录</button>
             </div>
           </form>
@@ -72,7 +63,12 @@ export default {
             localStorage.setItem('Authorization',"JWT " + response.data.token)
             localStorage.setItem('User',response.data.username)
             localStorage.setItem('UserId',response.data.id)
-            this.$router.push("/");
+            setTimeout(this.$router.push("/"), 5 * 100 )
+          }).catch(err => {
+            
+            if(err.response.status == 400){
+              this.$message.error('用户或密码错误')
+            }
           });
       }
     },

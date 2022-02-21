@@ -39,19 +39,21 @@
       :visible.sync="dialogFormVisible"
       width="30%"
     >
-      <el-form :model="form" label-position="right" label-width="120px">
-        <el-form-item label="项目名称" style="margin-top: 20px">
-          <el-input v-model="form.name" style="width: 350px"></el-input>
+      <el-form :model="form" label-position="right" label-width="120px" :rules="rules">
+        <el-form-item label="项目名称" style="margin-top: 20px" prop="name">
+          <el-input v-model="form.name" style="width: 350px" placeholder="请输入项目名称"></el-input>
         </el-form-item>
-        <el-form-item label="项目路径">
-          <el-input v-model="form.host" style="width: 350px"></el-input>
+        <el-form-item label="项目路径" :required="true">
+          <el-input v-model="form.host" style="width: 350px" placeholder="请输入项目路径 多个路径使用逗号隔开"></el-input>
         </el-form-item>
         <el-form-item label="最大并发数">
-          <el-input v-model="form.max_threads" style="width: 350px"></el-input>
+          <el-input v-model="form.max_threads" style="width: 350px"
+            placeholder="请输入最大并发数" 
+            oninput="value=value.replace(/[^\d]/g,'');if(value>10)value=10;if(value<1)value=1"></el-input>
         </el-form-item>
 
-        <el-form-item label="自动化任务路径">
-          <el-input v-model="form.auto_host" style="width: 350px"> </el-input>
+        <el-form-item label="自动化任务路径" :required="true">
+          <el-input v-model="form.auto_host" style="width: 350px" placeholder="请输入自动化路径"> </el-input>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -66,24 +68,26 @@
       :modal-append-to-body="false"
       width="30%"
     >
-      <el-form :model="edit_form" label-position="right" label-width="120px">
+      <el-form :model="edit_form" label-position="right" label-width="120px" :rules="rules">
         <el-form-item label="项目id" style="margin-top: 20px; display: none">
-          <el-input v-model="edit_form.id" style="width: 350px"></el-input>
+          <el-input v-model="edit_form.id" style="width: 350px" ></el-input>
         </el-form-item>
-        <el-form-item label="项目名称" style="margin-top: 20px">
-          <el-input v-model="edit_form.name" style="width: 350px"></el-input>
+        <el-form-item label="项目名称" style="margin-top: 20px" prop="name">
+          <el-input v-model="edit_form.name" style="width: 350px" placeholder="请输入项目名称"></el-input>
         </el-form-item>
-        <el-form-item label="项目路径">
-          <el-input v-model="edit_form.host" style="width: 350px"></el-input>
+        <el-form-item label="项目路径" :required="true">
+          <el-input v-model="edit_form.host" style="width: 350px" placeholder="请输入项目路径 多个路径使用逗号隔开"></el-input>
         </el-form-item>
         <el-form-item label="最大并发数">
           <el-input
             v-model="edit_form.max_threads"
             style="width: 350px"
+            placeholder="请输入最大并发数"
+            oninput="value=value.replace(/[^\d]/g,'');if(value>10)value=10;if(value<1)value=1"
           ></el-input>
         </el-form-item>
-        <el-form-item label="自动化任务路径">
-          <el-input v-model="edit_form.auto_host" style="width: 350px">
+        <el-form-item label="自动化任务路径" :required="true">
+          <el-input v-model="edit_form.auto_host" style="width: 350px" placeholder="请输入自动化任务路径">
           </el-input>
         </el-form-item>
       </el-form>
@@ -138,8 +142,13 @@ export default {
         name: "",
         host: "",
         author: localStorage.getItem("UserId"),
-        max_threads: "",
+        max_threads: 1,
         auto_host: "",
+      },
+      rules:{
+        name:[{required: true, message: '项目名称不能为空', trigger: 'blur'}],
+        pro_url:[{required: true, message: '项目路径不能为空', trigger: 'blur'}],
+        auto_url:[{required: true, message: '自动化路径不能为空', trigger: 'blur'}]
       },
       // 编辑项目的表单数据
       edit_form: {
@@ -147,7 +156,7 @@ export default {
         name: "",
         host: "",
         author: localStorage.getItem("UserId"),
-        max_threads: "",
+        max_threads: 1,
         auto_host: "",
       },
       token: localStorage.Authorization,
@@ -168,6 +177,18 @@ export default {
     ...mapMutations(['getUserList']),
     addProject() {
       const addProjectData = this.form;
+      if(!addProjectData['name'].trim()){
+        this.$message.error('项目名称不能为空')
+        return
+      }
+      if(!addProjectData['host'].trim()){
+        this.$message.error('项目路径不能为空')
+        return
+      }
+      if(!addProjectData['auto_host'].trim()){
+        this.$message.error('自动化路径不能为空')
+        return
+      }
       project.addProject(addProjectData)
         .then((response) => {
           if (response.data.code === 1) {
@@ -197,6 +218,18 @@ export default {
       this.isEdit = true;
     },
     editProject() {
+      if(!this.edit_form['name'].trim()){
+        this.$message.error('项目名称不能为空')
+        return
+      }
+      if(!this.edit_form['host'].trim()){
+        this.$message.error('项目路径不能为空')
+        return
+      }
+      if(!this.edit_form['auto_host'].trim()){
+        this.$message.error('自动化路径不能为空')
+        return
+      }
       project.editProject(this.edit_form.id,this.edit_form)
         .then((response) => {
           if (response.data.code == 1) {

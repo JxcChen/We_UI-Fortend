@@ -16,5 +16,9 @@
     height: 100%;
     width: 100%;
   }
+  label.irequired:before {
+      content: '* ';
+      color: red;
+  }
 </style>
 

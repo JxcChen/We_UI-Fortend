@@ -50,7 +50,7 @@ instance.interceptors.response.use(res=>{
               }
               messageInstance = Message({
                 type:'error',
-                message:response.data.message,
+                message:'请先登录',
                 center:true
             })
             router.replace({

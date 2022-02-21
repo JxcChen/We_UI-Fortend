@@ -68,14 +68,14 @@
       :modal-append-to-body="false"
       width="30%"
     >
-      <el-form :model="edit_form" label-position="right" label-width="120px">
+      <el-form :model="edit_form" label-position="right" label-width="120px" :rules="rules">
         <el-form-item label="用户id" style="margin-top: 20px; display: none">
           <el-input v-model="edit_form.id" style="width: 350px"></el-input>
         </el-form-item>
         <el-form-item label="用户名称" style="margin-top: 20px">
           <el-input disabled v-model="edit_form.username" style="width: 350px"></el-input>
         </el-form-item>
-        <el-form-item label="邮箱账号">
+        <el-form-item label="邮箱账号" prop="email">
           <el-input v-model="edit_form.email" style="width: 350px"></el-input>
         </el-form-item>
         <el-form-item label="用户角色">
@@ -127,6 +127,10 @@ export default {
         email: "",
         is_superuser: "",
       },
+      rules:{
+        email:[{required: true, message: '邮箱不能为空', trigger: 'blur'}],
+      },
+      
       
     };
   },
@@ -166,6 +170,9 @@ export default {
     },
     // 修改用户
     editUser() {
+      if(!this.edit_form.trim()){
+        return
+      }
       user.editUser(this.edit_form.id,this.edit_form)
         .then((response) => {
           if (response.data.code == 1) {
