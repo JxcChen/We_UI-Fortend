@@ -10,13 +10,12 @@ import api from './api/api'
 Vue.config.productionTip = false
 Vue.use(ElementUI);
 Vue.use(VueRouter)
-// Vue.prototype.$api=api
+Vue.prototype.$api=api
 
 new Vue({
   render: h => h(App),
   router:router,
   store,
-  api,
   beforeCreate() {
     Vue.prototype.$bus=this
   },

@@ -14,7 +14,9 @@ const user = {
         return axios
             .delete("http://127.0.0.1:8001/api/user/" + user_id + "/")
     },
-    
+    updatePwd(edit_data){
+        return axios.put("http://127.0.0.1:8001/api/user/" + localStorage.getItem('UserId') + "/",edit_data)
+    }
 }
 // 将接口进行导出 别的接口可以对其进行引用
 export default user

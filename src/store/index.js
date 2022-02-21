@@ -37,7 +37,7 @@ const mutations = {
         });
     },
     changePassword(state){
-        state.isChangePassword =true
+      state.isChangePassword = !state.isChangePassword
     }
 
 }

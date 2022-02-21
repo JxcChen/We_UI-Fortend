@@ -2,11 +2,13 @@
 
 import tcase from './case'
 import project from './project'
+import user from './user'
 // 声明api接口
 const api ={
     // 引入user接口
     tcase,
-    project
+    project,
+    user
 }
 // 导出api接口
 export default api
