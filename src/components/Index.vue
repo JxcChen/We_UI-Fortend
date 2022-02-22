@@ -14,16 +14,19 @@
               :modal-append-to-body="false"
               :visible.sync="$store.state.isChangePassword"
               width="450px"
+              :close-on-click-modal="false"
+              :close-on-press-escape="false"
+              :show-close="false"
               >
             <el-form ref="passwodForm" :model="form" label-width="80px"  :rules="rules">
               <el-form-item label="原密码" prop="old_password">
-                <el-input  style="width:280px" v-model="form.old_password" size="small" ></el-input>
+                <el-input  style="width:280px" v-model="form.old_password" size="small" placeholder="请输入原密码" show-password  ></el-input>
               </el-form-item>
               <el-form-item label="新密码" prop="new_password">
-                <el-input style="width:280px" v-model="form.new_password" size="small" ></el-input>
+                <el-input style="width:280px" v-model="form.new_password" size="small" placeholder="请输入新密码"  show-password></el-input>
               </el-form-item>
               <el-form-item label="确认密码" prop="comfirm_password">
-                <el-input style="width:280px" v-model="form.comfirm_password" size="small" ></el-input>
+                <el-input style="width:280px" v-model="form.comfirm_password" size="small" placeholder="请再次输入密码" show-password></el-input>
               </el-form-item>
               <el-form-item style="margin-left:50px">
                 <el-button type="primary" @click="changePwd('passwodForm')">确认</el-button>
@@ -69,8 +72,14 @@ import user from '../api/user'
                 old_password:this.form.old_password,
                 new_password:this.form.new_password
               }
-              user.updatePwd(request_data)
-              this.changePassword()
+              user.updatePwd(request_data).then(res => {
+                this.$message.success(res.data.msg)
+                this.changePassword()
+                this.changePassword()
+              }).catch(err => {
+                this.$message.error(err.data.msg)
+              })
+              
             }else{
               this.$message.error('两次密码不一致')
             }
@@ -80,7 +89,7 @@ import user from '../api/user'
         });
       },
       resetForm(formName) {
-        this.$refs[formName].resetFields();
+        this.$refs[formName].resetFields()
       },
       cancleChange(formName){
         this.changePassword()

@@ -45,7 +45,7 @@
 </template>
 
 <script>
-import {mapMutations} from 'vuex';
+import {mapMutations} from 'vuex'
 export default {
   name: "Navigation",
   data() {
@@ -57,7 +57,6 @@ export default {
     };
   },
   methods:{
-    ...mapMutations(['changePassword']),
     handleCommand(command){
       if(command === "2"){
         localStorage.clear();
@@ -67,7 +66,7 @@ export default {
       }
       
     },
-    
+    ...mapMutations(['changePassword']),
   },
   computed: {
     username() {
