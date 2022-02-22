@@ -2,8 +2,8 @@
   <div>
     <el-button v-show="isAdmin" @click="dialogFormVisible = true">新增用户</el-button>
     <el-table :data="users" stripe>
-      <el-table-column prop="id" label="id" > </el-table-column>
-      <el-table-column prop="username" label="用户名称" >
+      <el-table-column prop="id" label="id" width="100px"> </el-table-column>
+      <el-table-column prop="username" label="用户名称" width="200px">
       </el-table-column>
       <el-table-column prop="user_type" label="角色"> </el-table-column>
       <el-table-column prop="email" label="邮箱"> </el-table-column>
@@ -32,6 +32,9 @@
       :modal-append-to-body="false"
       :visible.sync="dialogFormVisible"
       width="40%"
+      :close-on-click-modal="false"
+      :close-on-press-escape="false"
+      :show-close="false"
     >
       <el-form :model="form" label-position="right" label-width="120px">
         <el-form-item label="用户名称" style="margin-top: 20px">

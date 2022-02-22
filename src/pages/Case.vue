@@ -60,13 +60,13 @@
       </div>
     </div>
 
-    <el-table :data="cases" stripe>
-      <el-table-column prop="id" label="id" > </el-table-column>
-      <el-table-column prop="name" label="用例名称" >
+    <el-table :data="cases" stripe style="width:100%" >
+      <el-table-column prop="id" label="id" width="100px" fixed> </el-table-column>
+      <el-table-column prop="name" label="用例名称" width="300px">
       </el-table-column>
-      <el-table-column prop="script_name" label="脚本名称"> </el-table-column>
-      <el-table-column prop="is_threads" label="是否并发" ></el-table-column>
-      <el-table-column prop="is_auto_excuse_show" label="是否自动执行" ></el-table-column>
+      <el-table-column prop="script_name" label="脚本名称" width="300px"> </el-table-column>
+      <el-table-column prop="is_threads" label="是否并发" width="150px"></el-table-column>
+      <el-table-column prop="is_auto_excuse_show" label="是否自动执行" width="150px"></el-table-column>
       <el-table-column fixed="right" label="操作" >
         <template slot-scope="scope">
           <el-button
@@ -102,6 +102,9 @@
       :modal-append-to-body="false"
       :visible.sync="dialogFormVisible"
       width="30%"
+      :close-on-click-modal="false"
+      :close-on-press-escape="false"
+      :show-close="false"
     >
       <el-form :model="form" label-position="right" label-width="120px" :rules="rules">
         <el-form-item label="用例名称" style="margin-top: 20px"  prop="name">

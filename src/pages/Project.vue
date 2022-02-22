@@ -1,15 +1,15 @@
 <template>
   <div>
     <el-button @click="dialogFormVisible = true">新增项目</el-button>
-    <el-table :data="projects" stripe style="width: 80%">
-      <el-table-column prop="id" label="id" > </el-table-column>
-      <el-table-column prop="name" label="项目名称" width="180">
+    <el-table  :data="projects" stripe   style="width: 100%">
+      <el-table-column prop="id" label="id" width="80px"> </el-table-column>
+      <el-table-column prop="name" label="项目名称" width="120px" >
       </el-table-column>
-      <el-table-column prop="author_name" label="负责人"> </el-table-column>
-      <el-table-column prop="host" label="项目地址"> </el-table-column>
-      <el-table-column prop="max_threads" label="最大并发" width="150px">
+      <el-table-column prop="author_name" label="负责人" width="120px"> </el-table-column>
+      <el-table-column prop="host" label="项目地址" > </el-table-column>
+      <el-table-column prop="max_threads" label="最大并发" width="120px">
       </el-table-column>
-      <el-table-column fixed="right" label="操作" width="300">
+      <el-table-column fixed="right" label="操作" >
         <template slot-scope="scope">
           <el-button
             type="primary"
@@ -37,64 +37,69 @@
       title="项目信息"
       :modal-append-to-body="false"
       :visible.sync="dialogFormVisible"
-      width="30%"
+      width="500px"
+      :close-on-click-modal="false"
+      :close-on-press-escape="false"
+      :show-close="false"
     >
-      <el-form :model="form" label-position="right" label-width="120px" :rules="rules">
+      <el-form  ref="addProForm" :model="form" label-position="right" label-width="120px" :rules="rules">
         <el-form-item label="项目名称" style="margin-top: 20px" prop="name">
-          <el-input v-model="form.name" style="width: 350px" placeholder="请输入项目名称"></el-input>
+          <el-input v-model="form.name" style="width: 300px" placeholder="请输入项目名称"></el-input>
         </el-form-item>
-        <el-form-item label="项目路径" :required="true">
-          <el-input v-model="form.host" style="width: 350px" placeholder="请输入项目路径 多个路径使用逗号隔开"></el-input>
+        <el-form-item label="项目路径" :required="true" prop="host">
+          <el-input v-model="form.host" style="width: 300px" placeholder="请输入项目路径 多个路径使用逗号隔开"></el-input>
         </el-form-item>
-        <el-form-item label="最大并发数">
-          <el-input v-model="form.max_threads" style="width: 350px"
+        <el-form-item label="最大并发数" >
+          <el-input v-model="form.max_threads" style="width: 300px"
             placeholder="请输入最大并发数" 
             oninput="value=value.replace(/[^\d]/g,'');if(value>10)value=10;if(value<1)value=1"></el-input>
         </el-form-item>
 
-        <el-form-item label="自动化任务路径" :required="true">
-          <el-input v-model="form.auto_host" style="width: 350px" placeholder="请输入自动化路径"> </el-input>
+        <el-form-item label="自动化任务路径" :required="true" prop="auto_host">
+          <el-input v-model="form.auto_host" style="width: 300px" placeholder="请输入自动化路径"> </el-input>
+        </el-form-item>
+        <el-form-item style="margin-left:40px">
+          <el-button type="primary" @click="addProject('addProForm')">确 定</el-button>
+          <el-button type="danger" @click="cancleAdd('addProForm')">取 消</el-button>
         </el-form-item>
       </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="addProject">确 定</el-button>
-        <el-button type="danger" @click="cancleAdd">取 消</el-button>
-      </div>
     </el-dialog>
     <!-- 编辑项目 -->
     <el-dialog
       title="项目信息"
       :visible.sync="isEdit"
       :modal-append-to-body="false"
-      width="30%"
+      width="500px"
+      
     >
-      <el-form :model="edit_form" label-position="right" label-width="120px" :rules="rules">
+      <el-form ref="editProForm" :model="edit_form" label-position="right" label-width="120px" :rules="rules">
         <el-form-item label="项目id" style="margin-top: 20px; display: none">
-          <el-input v-model="edit_form.id" style="width: 350px" ></el-input>
+          <el-input v-model="edit_form.id" style="width: 300px" ></el-input>
         </el-form-item>
         <el-form-item label="项目名称" style="margin-top: 20px" prop="name">
-          <el-input v-model="edit_form.name" style="width: 350px" placeholder="请输入项目名称"></el-input>
+          <el-input v-model="edit_form.name" style="width: 300px" placeholder="请输入项目名称"></el-input>
         </el-form-item>
-        <el-form-item label="项目路径" :required="true">
-          <el-input v-model="edit_form.host" style="width: 350px" placeholder="请输入项目路径 多个路径使用逗号隔开"></el-input>
+        <el-form-item label="项目路径" :required="true" prop="name">
+          <el-input v-model="edit_form.host" style="width: 300px" placeholder="请输入项目路径 多个路径使用逗号隔开"></el-input>
         </el-form-item>
         <el-form-item label="最大并发数">
           <el-input
             v-model="edit_form.max_threads"
-            style="width: 350px"
+            style="width: 300px"
             placeholder="请输入最大并发数"
             oninput="value=value.replace(/[^\d]/g,'');if(value>10)value=10;if(value<1)value=1"
           ></el-input>
         </el-form-item>
-        <el-form-item label="自动化任务路径" :required="true">
-          <el-input v-model="edit_form.auto_host" style="width: 350px" placeholder="请输入自动化任务路径">
+        <el-form-item label="自动化任务路径" :required="true" prop="name">
+          <el-input v-model="edit_form.auto_host" style="width: 300px" placeholder="请输入自动化任务路径">
           </el-input>
         </el-form-item>
+        <el-form-item style="margin-left:40px">
+          <el-button type="primary" @click="editProject('editProForm')">确 定</el-button>
+          <el-button type="danger" @click="resetForm('editProForm');isEdit = false">取 消</el-button>
+        </el-form-item>
       </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="editProject">确 定</el-button>
-        <el-button type="danger" @click="isEdit = false">取 消</el-button>
-      </div>
+      
     </el-dialog>
 
       <!-- 配置协作人员 -->
@@ -147,8 +152,8 @@ export default {
       },
       rules:{
         name:[{required: true, message: '项目名称不能为空', trigger: 'blur'}],
-        pro_url:[{required: true, message: '项目路径不能为空', trigger: 'blur'}],
-        auto_url:[{required: true, message: '自动化路径不能为空', trigger: 'blur'}]
+        host:[{required: true, message: '项目路径不能为空', trigger: 'blur'}],
+        auto_host:[{required: true, message: '自动化路径不能为空', trigger: 'blur'}]
       },
       // 编辑项目的表单数据
       edit_form: {
@@ -175,33 +180,28 @@ export default {
   },
   methods: {
     ...mapMutations(['getUserList']),
-    addProject() {
-      const addProjectData = this.form;
-      if(!addProjectData['name'].trim()){
-        this.$message.error('项目名称不能为空')
-        return
-      }
-      if(!addProjectData['host'].trim()){
-        this.$message.error('项目路径不能为空')
-        return
-      }
-      if(!addProjectData['auto_host'].trim()){
-        this.$message.error('自动化路径不能为空')
-        return
-      }
-      project.addProject(addProjectData)
-        .then((response) => {
-          if (response.data.code === 1) {
-            this.dialogFormVisible = false;
-            this.getProjectList();
-          } else {
-            this.$message(response.data.msg);
-          }
-          this.resetForm();
+    addProject(formName) {
+      // 先判断必填内容是否已填
+      this.$refs[formName].validate((valid) => {
+        if(valid){
+          const addProjectData = this.form;
+          project.addProject(addProjectData)
+            .then((response) => {
+              if (response.data.code === 1) {
+                this.cancleAdd(formName);
+                this.getProjectList();
+              } else {
+                this.$message(response.data.msg);
+              }
         })
         .catch((err) => {
           this.$message("项目信息输入有误");
         });
+        }else{
+          return false;
+        }
+      })
+      
     },
     getProjectList() {
       project.getProjectList()
@@ -209,39 +209,34 @@ export default {
           this.projects = response.data.data.res_pro_list;
         });
     },
-    cancleAdd() {
-      this.resetForm();
+    cancleAdd(formName) {
+      this.resetForm(formName);
       this.dialogFormVisible = false;
     },
     intoEditProject(pro) {
       this.edit_form = { ...this.edit_form, ...pro };
       this.isEdit = true;
     },
-    editProject() {
-      if(!this.edit_form['name'].trim()){
-        this.$message.error('项目名称不能为空')
-        return
-      }
-      if(!this.edit_form['host'].trim()){
-        this.$message.error('项目路径不能为空')
-        return
-      }
-      if(!this.edit_form['auto_host'].trim()){
-        this.$message.error('自动化路径不能为空')
-        return
-      }
-      project.editProject(this.edit_form.id,this.edit_form)
-        .then((response) => {
-          if (response.data.code == 1) {
-            this.isEdit = false;
-            this.getProjectList();
-          } else {
-            this.$message(response.data.msg);
-          }
-        })
-        .catch((err) => {
-          this.$message("项目信息输入有误");
-        });
+    editProject(formName) {
+      this.$refs[formName].validate(valid => {
+        if(valid){
+          project.editProject(this.edit_form.id,this.edit_form)
+            .then((response) => {
+              if (response.data.code == 1) {
+                this.isEdit = false;
+                this.getProjectList();
+              } else {
+                this.$message.error(response.data.msg);
+              }
+            })
+            .catch((err) => {
+              this.$message.error("项目信息输入有误");
+            });
+        }else{
+          return false;
+        }
+      })
+      
     },
     deleteProject(del_project) {
       const isDel = confirm("确定要删除该项目吗");
@@ -277,11 +272,9 @@ export default {
         this.setMember=false
       })
     },
-    resetForm() {
-      this.form.name = "";
-      this.form.host = "";
-      this.form.max_threads = "";
-      this.form.auto_host = "";
+    resetForm(formName) {
+      // 清空数据
+      this.$refs[formName].resetFields()
     },
   },
   
@@ -292,4 +285,14 @@ export default {
 </script>
 
 <style>
+
+  .el-table{
+    width: 100%;
+    .el-table__header-wrapper table,.el-table__body-wrapper table{
+      width: 100% !important;
+    }
+    .el-table__body, .el-table__footer, .el-table__header{
+      table-layout: auto;
+    }
+  }
 </style>

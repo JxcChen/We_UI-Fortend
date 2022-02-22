@@ -74,8 +74,7 @@ import user from '../api/user'
               }
               user.updatePwd(request_data).then(res => {
                 this.$message.success(res.data.msg)
-                this.changePassword()
-                this.changePassword()
+                this.cancleChange('passwodForm')
               }).catch(err => {
                 this.$message.error(err.data.msg)
               })
