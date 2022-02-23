@@ -13,7 +13,7 @@
           <el-button
             size="small"
             icon='el-icon-edit'
-            @click="intoEditProject(scope.row)"
+            @click="intoEditUser(scope.row)"
             >编辑</el-button
           >
           <el-button
@@ -164,7 +164,7 @@ export default {
       this.dialogFormVisible = false;
     },
     // 打开修改页面
-    intoEditProject(user) {
+    intoEditUser(user) {
       
       this.edit_form = { ...this.edit_form, ...user };
       // 设置角色类型  展示用
@@ -173,7 +173,7 @@ export default {
     },
     // 修改用户
     editUser() {
-      if(!this.edit_form.trim()){
+      if(!this.edit_form['email'].trim()){
         return
       }
       user.editUser(this.edit_form.id,this.edit_form)

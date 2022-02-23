@@ -74,7 +74,6 @@
             type="primary"
             size="small"
             icon="el-icon-caret-right"
-            :loading="isRunning"
             @click="excuseCase(scope.row)"
             >执行</el-button
           >

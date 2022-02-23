@@ -61,6 +61,14 @@ instance.interceptors.response.use(res=>{
                 }
             })
         }
+        if (messageInstance) {
+            messageInstance.close();
+          }
+          messageInstance = Message({
+            type:'error',
+            message:response.data.msg,
+            center:true
+        })
         return Promise.reject(response)
     }
 )

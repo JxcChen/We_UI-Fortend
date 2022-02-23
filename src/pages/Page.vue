@@ -30,21 +30,21 @@
             type="primary"
             size="small"
             icon='el-icon-edit'
-            @click="intoEditProject(scope.row)"
+            @click="intoEditPage(scope.row)"
             >编辑</el-button
           >
           <el-button
             type="primary"
             size="small"
             icon='el-icon-arrow-right'
-            @click="intoEditProject(scope.row)"
+            @click="lookElement(scope.row)"
             >查看页面元素</el-button
           >
           <el-button
             type="danger"
             size="small"
             icon="el-icon-delete"
-            @click="deleteUser(scope.row)"
+            @click="deletePage(scope.row)"
             >删除</el-button
           >
         </template>
@@ -64,8 +64,8 @@
         <el-form-item label="页面名称" style="margin-top: 20px" prop="name">
           <el-input  placeholder="请输入页面名称" v-model="form.name" style="width: 350px"></el-input>
         </el-form-item>
-        <el-form-item label="选择项目">
-          <el-select size="small" v-model="pro_id" filterable placeholder="请选择">
+        <el-form-item label="选择项目" prop="project_id">
+          <el-select size="small" v-model="form.project_id" filterable placeholder="请选择">
             <el-option
               v-for="pro in authorProjectList"
               :key="pro.id"
@@ -77,7 +77,7 @@
           </el-select>
         </el-form-item>
         <el-form-item style="margin-left:40px">
-          <el-button type="primary" @click="addProject('addPageForm')">确 定</el-button>
+          <el-button type="primary" @click="addPage('addPageForm')">确 定</el-button>
           <el-button type="danger" @click="cancleAdd('addPageForm')">取 消</el-button>
         </el-form-item>
       </el-form>
@@ -97,7 +97,7 @@
           <el-input  placeholder="请输入页面名称" v-model="edit_form.name" style="width: 350px"></el-input>
         </el-form-item>
         <el-form-item label="选择项目">
-          <el-select size="small" v-model="pro_id" filterable placeholder="请选择">
+          <el-select size="small" v-model="edit_form.project_id" filterable placeholder="请选择">
             <el-option
               v-for="pro in authorProjectList"
               :key="pro.id"
@@ -109,32 +109,33 @@
           </el-select>
         </el-form-item>
         <el-form-item style="margin-left:40px">
-          <el-button type="primary" @click="addProject('editPageForm')">确 定</el-button>
-          <el-button type="danger" @click="cancleAdd('editPageForm')">取 消</el-button>
+          <el-button type="primary" @click="editPage('editPageForm')">确 定</el-button>
+          <el-button type="danger" @click="isEdit=false;resetForm('editPageForm')">取 消</el-button>
         </el-form-item>
         
       </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="editUser">确 定</el-button>
-        <el-button type="danger" @click="isEdit = false">取 消</el-button>
-      </div>
     </el-dialog>
   </div>
 </template>
 
 <script>
-axios.defaults.withCredentials = true;
-import {mapState,mapMutations} from 'vuex';
+
+import project from '../api/project'
 import page from '../api/page'
 export default {
   name: "Page",
   data() {
     return {
+      // 页面列表
+      pages:[],
       // 是否进入编辑框
       isEdit: false,
       // 是否进入新增框
       dialogFormVisible: false,
-      
+      // 用户有权限的项目
+      authorProjectList:[],
+      // 当前项目
+      pro_id:'',
       token: localStorage.Authorization,
       // 当前用户
       currentUser: localStorage.UserId,
@@ -143,7 +144,7 @@ export default {
       form: {
         name: "",
         project_id: "",
-        author: localStorage.UserId
+        author: localStorage.User
       },
       // 编辑表单
       edit_form: {
@@ -152,6 +153,7 @@ export default {
       },
       rules:{
         name:[{required: true, message: '页面名称不能为空', trigger: 'blur'}],
+        project_id:[{required: true, message: '所属项目不能为空', trigger: 'blur'}]
       },
       
       
@@ -159,22 +161,31 @@ export default {
   },
   methods: {
     // 添加用户
-    addPage(fromName) {
-      page.addPage(this.form)
+    addPage(formName) {
+      this.$refs[formName].validate((valid) => {
+        if(valid){
+          page.addPage(this.form)
         .then((response) => {
           if (response.data.code === 1) {
-            this.cancleAdd(fromName);
+            this.cancleAdd(formName);
+            this.getPageList(this.pro_id)
           } else {
             this.$message(response.data.msg);
           }
-
         })
-        .catch((err) => {
-          this.$message("项目信息输入有误");
-        });
+        }else{
+          return false
+        }
+      })
+        
+
+
+      
     },
-    getPageList(){
-      page.getPageList(this)
+    getPageList(pro_id){
+      page.getPageList(pro_id).then(res =>{
+        this.pages = res.data.data.filter(p => p.project_id == this.pro_id)
+      })
     },
     // 取消添加
     cancleAdd(formName) {
@@ -182,43 +193,35 @@ export default {
       this.dialogFormVisible = false;
     },
     // 打开修改页面
-    intoEditProject(user) {
+    intoEditPage(user) {
       
       this.edit_form = { ...this.edit_form, ...user };
-      // 设置角色类型  展示用
-      this.edit_form['user_type'] = this.edit_form['is_superuser'] ? "超级管理员" : "普通用户"
       this.isEdit = true;
     },
     // 修改用户
-    editUser() {
-      if(!this.edit_form.trim()){
-        return
-      }
-      user.editUser(this.edit_form.id,this.edit_form)
+    editPage() {
+      page.editPage(this.edit_form.id,this.edit_form)
         .then((response) => {
           if (response.data.code == 1) {
             this.isEdit = false;
-            this.getUserList('userShow');
+            this.getPageList(this.pro_id)
           } else {
             this.$message(response.data.msg);
           }
         })
-        .catch((err) => {
-          this.$message("项目信息输入有误");
-        });
     },
-    // 删除用户
-    deleteUser(del_user) {
-      const isDel = confirm("确定要删除该用户吗");
-      if (isDel) {
-        user.deleteUser(del_user.id)
-          .then((response) => {
-            this.$message(response.data.msg);
-            if (response.data.code == 1) {
-              this.getUserList('userShow');
-            }
-          });
+    // 删除页面
+    deletePage(del_page) {
+      const isDel = confirm("删除该页面，会将该页面的元素一并删除；是否确定删除？")
+      if(isDel){
+        page.deletePage(del_page.id).then(res => {
+          if(res.data.code == 1){
+            this.$message.success(res.data.msg);
+            this.getPageList(this.pro_id)
+          }
+        })
       }
+      
     },
     // 重置添加表格
     resetForm(formName) {
@@ -228,14 +231,26 @@ export default {
     
   },
   computed:{
-    // 判断是不是超级管理员  只有超级管理员才能添加或者删除用户
-    isAdmin(){
-      return this.currentUser == 1
+  },
+  watch:{
+    pro_id(newValue, oldValue) {
+      // 获取对应项目页面
+      this.getPageList(newValue);
     },
-    ...mapState(['users'])
   },
   mounted() {
-    this.getUserList('userShow');
+    project.getProjectList()
+      .then((response) => {
+        response.data.data.res_pro_list.forEach((pro) => {
+          this.authorProjectList.push(pro);
+        });
+        if (response.data.data.res_pro_list.length > 0) {
+          this.pro_id = response.data.data.res_pro_list[0].id;
+          this.getPageList(this.pro_id);
+        } else {
+          this.pro_id = "";
+        }
+      })
   },
 };
 </script>
