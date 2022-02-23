@@ -9,6 +9,7 @@ import Login from '../components/Login'
 import Index from '../components/Index'
 import User from '../pages/User'
 import Element from '../pages/Element'
+import Page from '../pages/Page'
 Vue.use(VueRouter)
 
 
@@ -44,6 +45,11 @@ const Router = new VueRouter({
 					name: 'element',
 					path: 'element',
 					component: Element
+				},
+				{
+					name: 'page',
+					path: 'page',
+					component: Page
 				},
 				{
 					name: 'task',

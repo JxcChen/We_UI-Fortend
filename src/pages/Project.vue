@@ -1,7 +1,7 @@
 <template>
-  <div>
-    <el-button @click="dialogFormVisible = true">新增项目</el-button>
-    <el-table  :data="projects" stripe   style="width: 100%">
+  <div  style="width: 80% ;margin-left:10%;box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);border-radius: 20px" >
+    <el-button @click="dialogFormVisible = true" style="margin:10px 0 10px 10px">新增项目</el-button>
+    <el-table  :data="projects" stripe >
       <el-table-column prop="id" label="id" width="80px"> </el-table-column>
       <el-table-column prop="name" label="项目名称" width="120px" >
       </el-table-column>
@@ -12,6 +12,7 @@
       <el-table-column fixed="right" label="操作" >
         <template slot-scope="scope">
           <el-button
+            icon='el-icon-edit'
             type="primary"
             size="small"
             @click="intoEditProject(scope.row)"
@@ -20,14 +21,16 @@
           <el-button
             type="primary"
             size="small"
+            icon="el-icon-circle-plus-outline"
             @click="intoSetTeamMember(scope.row)"
             >添加协作人员</el-button
           >
           <el-button
             type="danger"
             size="small"
+            icon="el-icon-delete"
             @click="deleteProject(scope.row)"
-            >删除</el-button
+            ></el-button
           >
         </template>
       </el-table-column>
@@ -42,7 +45,7 @@
       :close-on-press-escape="false"
       :show-close="false"
     >
-      <el-form  ref="addProForm" :model="form" label-position="right" label-width="120px" :rules="rules">
+      <el-form  ref="addProForm" :model="form" label-position="right" label-width="120px" :rules="rules" class="demo-ruleForm">
         <el-form-item label="项目名称" style="margin-top: 20px" prop="name">
           <el-input v-model="form.name" style="width: 300px" placeholder="请输入项目名称"></el-input>
         </el-form-item>
@@ -72,7 +75,7 @@
       width="500px"
       
     >
-      <el-form ref="editProForm" :model="edit_form" label-position="right" label-width="120px" :rules="rules">
+      <el-form ref="editProForm" :model="edit_form" label-position="right" label-width="120px" :rules="rules" class="demo-ruleForm">
         <el-form-item label="项目id" style="margin-top: 20px; display: none">
           <el-input v-model="edit_form.id" style="width: 300px" ></el-input>
         </el-form-item>
@@ -286,13 +289,4 @@ export default {
 
 <style>
 
-  .el-table{
-    width: 100%;
-    .el-table__header-wrapper table,.el-table__body-wrapper table{
-      width: 100% !important;
-    }
-    .el-table__body, .el-table__footer, .el-table__header{
-      table-layout: auto;
-    }
-  }
 </style>

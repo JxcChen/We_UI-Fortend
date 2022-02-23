@@ -1,8 +1,8 @@
 <template>
-  <div>
-    <div>
+  <div style="width: 80% ;margin-left:10%;box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);border-radius: 20px">
+    <div style="margin:10px 10px 10px 10px;padding-top: 15px">
       当前项目：
-      <el-select size="small" v-model="pro_id" placeholder="请选择">
+      <el-select filterable size="small" v-model="pro_id" placeholder="请选择">
         <el-option
           v-for="pro in authorProjectList"
           :key="pro.id"
@@ -60,7 +60,7 @@
       </div>
     </div>
 
-    <el-table :data="cases" stripe style="width:100%" >
+    <el-table :data="cases" stripe >
       <el-table-column prop="id" label="id" width="100px" fixed> </el-table-column>
       <el-table-column prop="name" label="用例名称" width="300px">
       </el-table-column>
@@ -73,25 +73,27 @@
             ref="excuseBtn"
             type="primary"
             size="small"
+            icon="el-icon-caret-right"
+            :loading="isRunning"
             @click="excuseCase(scope.row)"
             >执行</el-button
           >
           <el-button
-            ref="excuseBtn"
-            type="danger"
+            type="primary"
             size="small"
+            icon="el-icon-edit"
             @click="intoEditCase(scope.row)"
             >编辑</el-button
           >
           <el-button
-            ref="excuseBtn"
-            type="danger"
+            type="primary"
             size="small"
+            icon="el-icon-view"
             @click="lookReport(scope.row)"
             >报告</el-button
           >
-          <el-button type="danger" size="small" @click="deleteCase(scope.row)"
-            >删除</el-button
+          <el-button type="danger" icon="el-icon-delete" size="small" @click="deleteCase(scope.row)"
+            ></el-button
           >
         </template>
       </el-table-column>
@@ -325,7 +327,7 @@
             </el-select>
             &nbsp&nbsp
             <span v-show="sendType==1">选择通知人员: 
-              <el-select size="small" v-model="sendUserList" multiple placeholder="请选择">
+              <el-select size="small" v-model="sendUserList" filterable multiple placeholder="请选择">
                 <el-option
                   v-for="u in users"
                   :key="u.id"

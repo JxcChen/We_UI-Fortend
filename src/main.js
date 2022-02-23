@@ -6,9 +6,6 @@ import ElementUI from 'element-ui';
 import 'element-ui/lib/theme-chalk/index.css';
 import store from './store'
 import api from './api/api'
-import Plugin from 'v-fit-columns';
-
-Vue.use(Plugin);
 
 Vue.config.productionTip = false
 Vue.use(ElementUI);

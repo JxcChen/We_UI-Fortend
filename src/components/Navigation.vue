@@ -18,8 +18,8 @@
             <el-menu-item index="user">人员管理</el-menu-item>
             <el-submenu index="4">
               <template slot="title">元素库管理</template>
-              <el-menu-item index="4-1">元素库列表</el-menu-item>
-              <el-menu-item index="4-2">页面管理</el-menu-item>
+              <el-menu-item index="element">元素库列表</el-menu-item>
+              <el-menu-item index="page">页面管理</el-menu-item>
             </el-submenu>
             <el-menu-item index="project">项目管理</el-menu-item>
           </el-menu>
