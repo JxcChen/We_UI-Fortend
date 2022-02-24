@@ -63,13 +63,14 @@ export default {
             localStorage.setItem('Authorization',"JWT " + response.data.token)
             localStorage.setItem('User',response.data.username)
             localStorage.setItem('UserId',response.data.id)
-            setTimeout(this.$router.push("/"), 5 * 100 )
           }).catch(err => {
-            
             if(err.response.status == 400){
               this.$message.error('用户或密码错误')
+              return Promise.reject(err)
             }
           });
+
+          this.$router.push("/")
       }
     },
   },

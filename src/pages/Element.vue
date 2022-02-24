@@ -10,20 +10,18 @@
             :key="pro.id"
             :label="pro.name"
             :value="pro.id"
-            :project_index="pro.index"
           >
           </el-option>
         </el-select>
       </span>
       <span >
         选择页面：
-        <el-select size="small" v-model="pro_id" filterable placeholder="请选择">
+        <el-select size="small" v-model="page_id" filterable placeholder="请选择">
           <el-option
-            v-for="pro in authorProjectList"
-            :key="pro.id"
-            :label="pro.name"
-            :value="pro.id"
-            :project_index="pro.index"
+            v-for="page in projectPageList"
+            :key="page.id"
+            :label="page.name"
+            :value="page.id"
           >
           </el-option>
         </el-select>
@@ -32,12 +30,12 @@
     </div>
     
      
-    <el-table :data="users" stripe>
+    <el-table :data="eleList" stripe>
       <el-table-column prop="id" label="id" width="100px"> </el-table-column>
       <el-table-column prop="name" label="元素名称名称" width="200px">
       </el-table-column>
-      <el-table-column prop="user_type" label="所属页面"> </el-table-column>
-      <el-table-column prop="email" label="元素定位"> </el-table-column>
+      <el-table-column prop="page_id" label="所属页面"> </el-table-column>
+      <el-table-column prop="element_location" label="元素定位"> </el-table-column>
       
       <el-table-column fixed="right" label="操作" >
         <template slot-scope="scope">
@@ -58,7 +56,7 @@
     </el-table>
     <!-- 新增用户框 -->
     <el-dialog
-      title="用户信息"
+      title="页面信息"
       :modal-append-to-body="false"
       :visible.sync="dialogFormVisible"
       width="40%"
@@ -66,64 +64,46 @@
       :close-on-press-escape="false"
       :show-close="false"
     >
-      <el-form :model="form" label-position="right" label-width="120px">
-        <el-form-item label="用户名称" style="margin-top: 20px">
-          <el-input  placeholder="请输入用户名" v-model="form.username" style="width: 350px"></el-input>
+      <el-form :model="form" label-position="right" label-width="120px" :rules="rules" ref="addElementForm">
+        <el-form-item label="元素id" style="display: none">
+          <el-input v-model="form.id" style="width: 350px"></el-input>
         </el-form-item>
-        <el-form-item label="邮箱账号">
-          <el-input placeholder="请输入邮箱" v-model="form.email" style="width: 350px"></el-input>
+        <el-form-item label="元素名称" style="margin-top: 20px" prop="name">
+          <el-input  placeholder="请输入元素名称" v-model="form.name" style="width: 350px"></el-input>
         </el-form-item>
-        <el-form-item label="用户角色">
-          <el-select size="small" v-model="form.is_superuser" placeholder="请选择">
-            <el-option
-              v-for="userType in userTypeList"
-              :key="userType.num"
-              :label="userType.type"
-              :value="userType.num"
-            >
-            </el-option>
-          </el-select>
+        <el-form-item label="元素定位" style="margin-top: 20px" prop="name">
+          <el-input  placeholder="请输入元素定位" v-model="form.element_location" style="width: 350px"></el-input>
+        </el-form-item>
+        <el-form-item style="margin-left:40px">
+          <el-button type="primary" @click="addElement('addElementForm')">确 定</el-button>
+          <el-button type="danger" @click="isEdit=false;resetForm('addElementForm')">取 消</el-button>
         </el-form-item>
         
-        <el-form-item label="设置密码">
-          <el-input v-model="form.password" style="width: 350px" placeholder="请输入密码" show-password> </el-input>
-        </el-form-item>
       </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="addUser">确 定</el-button>
-        <el-button type="danger" @click="cancleAdd">取 消</el-button>
-      </div>
     </el-dialog>
-    <!-- 编辑用户框 -->
+    <!-- 编辑元素框 -->
     <el-dialog
-      title="项目信息"
+      title="页面信息"
       :visible.sync="isEdit"
       :modal-append-to-body="false"
-      width="30%"
+      width="40%"
     >
-      <el-form :model="edit_form" label-position="right" label-width="120px" :rules="rules">
-        <el-form-item label="用户id" style="margin-top: 20px; display: none">
+      <el-form :model="edit_form" label-position="right" label-width="120px" :rules="rules" ref="editElementForm">
+        <el-form-item label="元素id" style="display: none">
           <el-input v-model="edit_form.id" style="width: 350px"></el-input>
         </el-form-item>
-        <el-form-item label="用户名称" style="margin-top: 20px">
-          <el-input disabled v-model="edit_form.username" style="width: 350px"></el-input>
+        <el-form-item label="元素名称" style="margin-top: 20px" prop="name">
+          <el-input  placeholder="请输入元素名称" v-model="edit_form.name" style="width: 350px"></el-input>
         </el-form-item>
-        <el-form-item label="邮箱账号" prop="email">
-          <el-input v-model="edit_form.email" style="width: 350px"></el-input>
+        <el-form-item label="元素定位" style="margin-top: 20px" prop="name">
+          <el-input  placeholder="请输入元素定位" v-model="edit_form.element_location" style="width: 350px"></el-input>
         </el-form-item>
-        <el-form-item label="用户角色">
-          <el-input 
-            disabled
-            v-model="edit_form.user_type"
-            style="width: 350px"
-          ></el-input>
+        <el-form-item style="margin-left:40px">
+          <el-button type="primary" @click="editElement('editElementForm')">确 定</el-button>
+          <el-button type="danger" @click="isEdit=false;resetForm('editElementForm')">取 消</el-button>
         </el-form-item>
         
       </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="editUser">确 定</el-button>
-        <el-button type="danger" @click="isEdit = false">取 消</el-button>
-      </div>
     </el-dialog>
   </div>
 </template>
@@ -131,12 +111,21 @@
 <script>
 import axios from "axios";
 axios.defaults.withCredentials = true;
-import {mapState,mapMutations} from 'vuex';
-import user from '../api/user'
+
+import project from '../api/project'
+import page from '../api/page'
+import element from '../api/element'
 export default {
   name: "Element",
   data() {
     return {
+      // 项目列表
+      authorProjectList:[],
+      // 项目页面列表
+      projectPageList:[],
+      eleList:[],
+      pro_id:'',
+      page_id:'',
       // 是否进入编辑框
       isEdit: false,
       // 用户类型列表
@@ -144,21 +133,16 @@ export default {
       // 是否进入新增框
       dialogFormVisible: false,
       token: localStorage.Authorization,
-      // 当前用户
-      currentUser: localStorage.UserId,
       // 新增表单
       form: {
-        username: "",
-        email: "",
-        password: "",
-        is_superuser: "",
+        name: "",
+        element_location: "",
       },
       // 编辑表单
       edit_form: {
-        id: "",
-        username: "",
-        email: "",
-        is_superuser: "",
+        id:"",
+        name: "",
+        element_location: "",
       },
       rules:{
         email:[{required: true, message: '邮箱不能为空', trigger: 'blur'}],
@@ -168,24 +152,36 @@ export default {
     };
   },
   methods: {
-    // 获取用户列表
-    ...mapMutations(['getUserList']),
-    // 添加用户
-    addUser() {
-      const addProjectData = {...this.addProjectData,...this.form}
-      addProjectData['is_superuser'] = this.form['is_superuser'] === 0
-      user.addUser(addProjectData)
+    getElementList(page_id){
+      element.getElementList(page_id).then(res => {
+        this.eleList = res.data.data
+      })
+    },
+    // 获取页面
+    getPageList(pro_id){
+      page.getPageList(pro_id).then(res =>{
+        this.projectPageList = res.data.data.filter(p => p.project_id == this.pro_id)
+        if(this.projectPageList.length > 0){
+          this.page_id = this.projectPageList[0].id
+        }
+      })
+    },
+    // 添加元素
+    addElement(formName) {
+      const addData = {...this.form};
+      addData['page_id'] = this.page_id;
+      element.addElement(addData)
         .then((response) => {
           if (response.data.code === 1) {
             this.dialogFormVisible = false;
-            this.getUserList('userShow');
+            this.getElementList(this.page_id);
+            this.cancleAdd(formName)
           } else {
             this.$message(response.data.msg);
           }
-          this.resetForm();
         })
         .catch((err) => {
-          this.$message("项目信息输入有误");
+          this.$message(err.data.msg);
         });
     },
     // 取消添加
@@ -194,62 +190,71 @@ export default {
       this.dialogFormVisible = false;
     },
     // 打开修改页面
-    intoEditProject(user) {
-      
-      this.edit_form = { ...this.edit_form, ...user };
-      // 设置角色类型  展示用
-      this.edit_form['user_type'] = this.edit_form['is_superuser'] ? "超级管理员" : "普通用户"
+    intoEditProject(element) {
+      this.edit_form = { ...this.edit_form, ...element };
       this.isEdit = true;
     },
-    // 修改用户
-    editUser() {
-      if(!this.edit_form.trim()){
-        return
-      }
-      user.editUser(this.edit_form.id,this.edit_form)
+    // 修改元素
+    editElement(formName) {
+      const editData = {...this.edit_form};
+      editData['page_id'] = this.page_id;
+      element.editElement(editData.id,editData)
         .then((response) => {
           if (response.data.code == 1) {
             this.isEdit = false;
-            this.getUserList('userShow');
+            this.resetForm(formName)
+            this.getElementList(this.page_id);
           } else {
             this.$message(response.data.msg);
           }
         })
         .catch((err) => {
-          this.$message("项目信息输入有误");
+          this.$message(err.data.msg);
         });
     },
-    // 删除用户
-    deleteUser(del_user) {
+    // 删除元素
+    deleteElement(del_element) {
       const isDel = confirm("确定要删除该用户吗");
       if (isDel) {
-        user.deleteUser(del_user.id)
+        element.deleteElement(del_element.id)
           .then((response) => {
             this.$message(response.data.msg);
             if (response.data.code == 1) {
-              this.getUserList('userShow');
+              this.getElementList(this.page_id);
             }
           });
       }
     },
     // 重置添加表格
-    resetForm() {
-      this.form.username = "";
-      this.form.email="";
-      this.form.password = ""
-      this.form.is_superuser= "";
+    resetForm(formName) {
+      // 清空数据
+      this.$refs[formName].resetFields()
     },
     
   },
-  computed:{
-    // 判断是不是超级管理员  只有超级管理员才能添加或者删除用户
-    isAdmin(){
-      return this.currentUser == 1
+  watch:{
+    pro_id(newValue, oldValue) {
+      // 获取对应项目页面
+      this.getPageList(newValue);
     },
-    ...mapState(['users'])
+    page_id(newValue, oldValue) {
+      // 获取对应项目页面
+      this.getElementList(newValue);
+    },
   },
   mounted() {
-    this.getUserList('userShow');
+    project.getProjectList()
+      .then((response) => {
+        response.data.data.res_pro_list.forEach((pro) => {
+          this.authorProjectList.push(pro);
+        });
+        if (response.data.data.res_pro_list.length > 0) {
+          this.pro_id = response.data.data.res_pro_list[0].id;
+          this.getPageList(this.pro_id);
+        } else {
+          this.pro_id = "";
+        }
+      })
   },
 };
 </script>
