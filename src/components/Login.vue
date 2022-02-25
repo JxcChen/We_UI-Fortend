@@ -47,7 +47,6 @@ export default {
     };
   },
   methods: {
-    ...mapMutations(["changeLogin"]),
     login() {
       if (this.username === "" || this.password === "") {
         this.$message("账号或密码不能为空");
@@ -60,9 +59,11 @@ export default {
           .post("http://127.0.0.1:8001/api/login/", loginData)
           .then((response) => {
             // 将认证信息放置localStorage
-            localStorage.setItem('Authorization',"JWT " + response.data.token)
-            localStorage.setItem('User',response.data.username)
-            localStorage.setItem('UserId',response.data.id)
+            localStorage.clear();
+            localStorage.setItem('Authorization',"JWT " + response.data.token);
+            localStorage.setItem('User',response.data.username);
+            localStorage.setItem('UserId',response.data.id);
+            this.$router.push({path:"/"});
           }).catch(err => {
             if(err.response.status == 400){
               this.$message.error('用户或密码错误')
@@ -70,7 +71,7 @@ export default {
             }
           });
 
-          this.$router.push("/")
+          
       }
     },
   },

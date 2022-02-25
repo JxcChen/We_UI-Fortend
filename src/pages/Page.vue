@@ -1,7 +1,7 @@
 <template>
   <div style="width: 80% ;margin-left:10%;box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);border-radius: 20px">
     <div style="margin:10px 10px 10px 10px;padding-top:10px">
-      <el-button  @click="dialogFormVisible = true" style="margin-left:10px;" size="small" >新 增 页 面</el-button>
+      <el-button  @click="intoAddPage" style="margin-left:10px;" size="small" >新 增 页 面</el-button>
       <span style="float:left">
         当前项目：
         <el-select size="small" v-model="pro_id" filterable placeholder="请选择">
@@ -32,13 +32,6 @@
             icon='el-icon-edit'
             @click="intoEditPage(scope.row)"
             >编辑</el-button
-          >
-          <el-button
-            type="primary"
-            size="small"
-            icon='el-icon-arrow-right'
-            @click="lookElement(scope.row)"
-            >查看页面元素</el-button
           >
           <el-button
             type="danger"
@@ -160,6 +153,15 @@ export default {
     };
   },
   methods: {
+    // 进入新增页面
+    intoAddPage(){
+      // 先判断是否有页面
+      if(this.authorProjectList.length>0){
+        this.dialogFormVisible = true
+      }else{
+        this.$message.error("请先添加项目")
+      }
+    },
     // 添加用户
     addPage(formName) {
       this.$refs[formName].validate((valid) => {

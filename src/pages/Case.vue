@@ -28,12 +28,6 @@
       <el-button
         size="small"
         class="my_btn"
-        @click="dialogFormVisible = true"
-        >新增用例</el-button
-      >
-      <el-button
-        size="small"
-        class="my_btn"
         @click="uploadUtils"
         >
         更新调试包
@@ -44,8 +38,14 @@
         @click="intoSetAutoTask"
         >
         自动化任务设置
-        </el-button>
-
+      </el-button>
+      <el-button
+        type="primary"
+        size="small"
+        class="my_btn"
+        @click="intoAddPage"
+        >新增用例</el-button
+      >
       <div style="float: right">
         执行路径：
         <el-select size="small" v-model="excuseHost" placeholder="请选择">
@@ -343,23 +343,35 @@
             &nbsp&nbsp
             <el-button @click="addNotice"  icon="el-icon-check" circle size='small'></el-button>
           </div>
-          
         </el-tab-pane>
       </el-tabs>
     </el-dialog>
+    <pagenation
+      :total="count" 
+      :pageSize="pageSize" 
+      @change="pageChange">
+    </pagenation>
   </div>
 </template>
 
 <script>
-import axios from "axios";
+
 import constant from "../constant/constant"
 import {mapState,mapMutations} from 'vuex';
-axios.defaults.withCredentials = true;
 import tcase from "../api/case"
+import Pagenation from "./Pagenation.vue"
 export default {
   name: "Project",
+  components:{
+    Pagenation
+  },
   data() {
     return {
+      // 当前页面
+      currentPage:1,
+      // 用例总数
+      count:0,
+      pageSize: 10,
       // 自动化任务任务设置默认选项
       activeName: 'first',
       sendType: '1',
@@ -472,6 +484,15 @@ export default {
       if (isdel) this.form.script_name = "";
       return isdel;
     },
+    // 进入新增页面
+    intoAddPage(){
+      // 先判断是否有页面
+      if(this.authorProjectList.length>0){
+        this.dialogFormVisible = true
+      }else{
+        this.$message.error("请先添加项目")
+      }
+    },
     // 上传文件
     submitUpload() {
       this.$refs.uploadFile.submit();
@@ -498,10 +519,10 @@ export default {
     },
     // 获取对应项目下的所有用例
     getCaseList(pro_id) {
-      tcase.getCaseList(pro_id)
+      tcase.getCaseList(pro_id,this.currentPage,this.pageSize)
         .then((response) => {
           // 将并发以是否进行展示
-          response.data.data.forEach((c) => {
+          response.data.data.res_list.forEach((c) => {
             c["is_thread"] === 1
               ? (c["is_threads"] = "是")
               : (c["is_threads"] = "否");
@@ -509,7 +530,9 @@ export default {
             ? (c["is_auto_excuse_show"] = "是")
             : (c["is_auto_excuse_show"] = "否");
           });
-          this.cases = response.data.data;
+          this.cases = response.data.data.res_list;
+          this.count = response.data.data.count
+
         });
     },
     // 进入修改用例页面
@@ -645,22 +668,29 @@ export default {
     //进入自动化任务设置编辑框
     intoSetAutoTask(){
       tcase.getProjectDetail(this.pro_id).then(response=>{
-        const res_data = response.data.data
-        this.autoTask.autoSwitch = res_data['is_auto'] == 1 ? true : false
-        this.autoTask.autoExcuseTime = res_data['excuse_time']
+        if(response.status == 1){
+          const res_data = response.data.data
+          this.autoTask.autoSwitch = res_data['is_auto'] == 1 ? true : false
+          this.autoTask.autoExcuseTime = res_data['excuse_time']
+        }
       })
       // 获取已配置的任务通知
       tcase.getProjectNotice(this.pro_id).then(response=>{
-        const res_data = response.data.data
-        this.sendType = res_data['notice_type']+''
-        this.sendUserList.splice(0)
-        if(this.sendType === '1'){
-          res_data['user_list'].split(',').forEach(user => {
-            this.sendUserList.push(Number(user))
-          })
+        if(response.data.data != ''){
+          const res_data = response.data.data
+          this.sendType = res_data['notice_type']+''
+          this.sendUserList.splice(0)
+          if(this.sendType === '1'){
+            res_data['user_list'].split(',').forEach(user => {
+              this.sendUserList.push(Number(user))
+            })
+          }
+          this.webhook = res_data['webhook']
+        }else{
+          // 清空通知里的数据
+          this.sendUserList.splice(0)
+          this.webhook = ''
         }
-        this.webhook = res_data['webhook']
-
       })
       // 获取所有人员
       this.getUserList('all')
@@ -721,6 +751,11 @@ export default {
         this.$message(res.data.msg)
         this.isSetAuto = false
       })
+    },
+    // 修改页面后重新获取数据
+    pageChange(page){
+      this.currentPage = page;
+      this.getCaseList(this.pro_id)
     }
     
   },
@@ -732,7 +767,7 @@ export default {
     uploadUtilsUrl(){
       return constant.baseURL+"case/uploadUtils/" + this.pro_id + "/";
     },
-    ...mapState(['users'])
+    ...mapState(['users']),
   },
   watch: {
     pro_id(newValue, oldValue) {

@@ -3,10 +3,12 @@ import axios from './http'
 // 声明接口
 const tcase = {
   // 获取对应项目下的所有用例
-  getCaseList(pro_id) {
+  getCaseList(pro_id,currentPage,pageSize) {
     return axios.get("case/", {
         params: {
           "pro_id": pro_id,
+          current_page: currentPage,
+          page_size: pageSize
         },
       })
   },

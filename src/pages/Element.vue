@@ -26,7 +26,7 @@
           </el-option>
         </el-select>
       </span>
-      <el-button  @click="dialogFormVisible = true" style="margin-left:10px;" size="small" >新 增 元 素</el-button>
+      <el-button  @click="intoAddPage" style="margin-left:10px;" size="small" >新 增 元 素</el-button>
     </div>
     
      
@@ -48,7 +48,7 @@
           <el-button
             type="danger"
             size="small"
-            @click="deleteUser(scope.row)"
+            @click="deleteElement(scope.row)"
             >删除</el-button
           >
         </template>
@@ -162,9 +162,21 @@ export default {
       page.getPageList(pro_id).then(res =>{
         this.projectPageList = res.data.data.filter(p => p.project_id == this.pro_id)
         if(this.projectPageList.length > 0){
+          // 如果有内容默认选中第一个
           this.page_id = this.projectPageList[0].id
+        }else{
+          this.page_id = ""
         }
       })
+    },
+    // 进入新增页面
+    intoAddPage(){
+      // 先判断是否有页面
+      if(this.projectPageList.length>0){
+        this.dialogFormVisible = true
+      }else{
+        this.$message.error("请先添加页面")
+      }
     },
     // 添加元素
     addElement(formName) {
@@ -238,8 +250,14 @@ export default {
       this.getPageList(newValue);
     },
     page_id(newValue, oldValue) {
-      // 获取对应项目页面
-      this.getElementList(newValue);
+      // 如果非空就获取对应项目页面
+      if(newValue != ''){
+        this.getElementList(newValue);
+      }else{
+        // 清空页面元素数据
+        this.eleList.splice(0)
+      }
+      
     },
   },
   mounted() {
