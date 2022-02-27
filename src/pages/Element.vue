@@ -32,9 +32,8 @@
      
     <el-table :data="eleList" stripe>
       <el-table-column prop="id" label="id" width="100px"> </el-table-column>
-      <el-table-column prop="name" label="元素名称名称" width="200px">
-      </el-table-column>
-      <el-table-column prop="page_id" label="所属页面"> </el-table-column>
+      <el-table-column prop="name" label="元素名称名称" width="200px"></el-table-column>
+      <el-table-column prop="loc_method" label="定位方式" width="200px"></el-table-column>
       <el-table-column prop="element_location" label="元素定位"> </el-table-column>
       
       <el-table-column fixed="right" label="操作" >
@@ -54,7 +53,7 @@
         </template>
       </el-table-column>
     </el-table>
-    <!-- 新增用户框 -->
+    <!-- 新增元素框 -->
     <el-dialog
       title="页面信息"
       :modal-append-to-body="false"
@@ -71,12 +70,24 @@
         <el-form-item label="元素名称" style="margin-top: 20px" prop="name">
           <el-input  placeholder="请输入元素名称" v-model="form.name" style="width: 350px"></el-input>
         </el-form-item>
-        <el-form-item label="元素定位" style="margin-top: 20px" prop="name">
+        <el-form-item label="定位方式" style="margin-top: 20px" prop="loc_method">
+          <el-select size="small" v-model="form.loc_method" filterable placeholder="请选择">
+            <el-option
+              v-for="(method,index) in locMethods"
+              :key="index"
+              :label="method.label"
+              :value="method.value"
+            >
+            </el-option>
+          </el-select>
+        </el-form-item>
+        
+        <el-form-item label="元素定位" style="margin-top: 20px" prop="element_location">
           <el-input  placeholder="请输入元素定位" v-model="form.element_location" style="width: 350px"></el-input>
         </el-form-item>
         <el-form-item style="margin-left:40px">
           <el-button type="primary" @click="addElement('addElementForm')">确 定</el-button>
-          <el-button type="danger" @click="isEdit=false;resetForm('addElementForm')">取 消</el-button>
+          <el-button type="danger" @click="dialogFormVisible=false;resetForm('addElementForm')">取 消</el-button>
         </el-form-item>
         
       </el-form>
@@ -95,8 +106,30 @@
         <el-form-item label="元素名称" style="margin-top: 20px" prop="name">
           <el-input  placeholder="请输入元素名称" v-model="edit_form.name" style="width: 350px"></el-input>
         </el-form-item>
+        <el-form-item label="定位方式" style="margin-top: 20px" >
+          <el-select size="small" v-model="edit_form.loc_method" filterable placeholder="请选择">
+            <el-option
+              v-for="(method,index) in locMethods"
+              :key="index"
+              :label="method.label"
+              :value="method.value"
+            >
+            </el-option>
+          </el-select>
+        </el-form-item>
         <el-form-item label="元素定位" style="margin-top: 20px" prop="name">
           <el-input  placeholder="请输入元素定位" v-model="edit_form.element_location" style="width: 350px"></el-input>
+        </el-form-item>
+        <el-form-item label="所属页面" style="margin-top: 20px" prop="name">
+          <el-select size="small" v-model="edit_form.page_id" filterable placeholder="请选择">
+            <el-option
+              v-for="page in projectPageList"
+              :key="page.id"
+              :label="page.name"
+              :value="page.id"
+            >
+            </el-option>
+          </el-select>
         </el-form-item>
         <el-form-item style="margin-left:40px">
           <el-button type="primary" @click="editElement('editElementForm')">确 定</el-button>
@@ -105,6 +138,11 @@
         
       </el-form>
     </el-dialog>
+    <pagenation
+      :total="count" 
+      :pageSize="pageSize" 
+      @change="pageChange">
+    </pagenation>
   </div>
 </template>
 
@@ -112,17 +150,43 @@
 import axios from "axios";
 axios.defaults.withCredentials = true;
 
-import project from '../api/project'
+import tcase from '../api/case'
 import page from '../api/page'
 import element from '../api/element'
+import Pagenation from './Pagenation.vue'
 export default {
   name: "Element",
+  components:{
+    Pagenation
+  },
   data() {
     return {
+      // 当前页面
+      currentPage:1,
+      // 用例总数
+      count:0,
+      pageSize: 10,
       // 项目列表
       authorProjectList:[],
       // 项目页面列表
       projectPageList:[],
+      // 定位方法列表
+      locMethods:[{
+          value: 'id',
+          label: 'id'
+        }, {
+          value: 'name',
+          label: 'name'
+        }, {
+          value: 'xpath',
+          label: 'xpath'
+        }, {
+          value: 'css',
+          label: 'css'
+        }, {
+          value: 'tag',
+          label: 'tag'
+        }],
       eleList:[],
       pro_id:'',
       page_id:'',
@@ -137,15 +201,19 @@ export default {
       form: {
         name: "",
         element_location: "",
+        loc_method:""
       },
       // 编辑表单
       edit_form: {
         id:"",
         name: "",
         element_location: "",
+        loc_method:""
       },
       rules:{
-        email:[{required: true, message: '邮箱不能为空', trigger: 'blur'}],
+        name:[{required: true, message: '元素名称不能为空', trigger: 'blur'}],
+        element_location:[{required: true, message: '元素定位不能为空', trigger: 'blur'}],
+        loc_method:[{required: true, message: '定位方式不能为空', trigger: 'blur'}],
       },
       
       
@@ -153,17 +221,20 @@ export default {
   },
   methods: {
     getElementList(page_id){
-      element.getElementList(page_id).then(res => {
-        this.eleList = res.data.data
+      element.getElementList(page_id,this.currentPage,this.pageSize).then(res => {
+        this.eleList = res.data.data.res_list
+        this.count = res.data.data.count
+
       })
     },
     // 获取页面
     getPageList(pro_id){
       page.getPageList(pro_id).then(res =>{
-        this.projectPageList = res.data.data.filter(p => p.project_id == this.pro_id)
+        this.projectPageList = res.data.data.res_list.filter(p => p.project_id == this.pro_id)
         if(this.projectPageList.length > 0){
           // 如果有内容默认选中第一个
           this.page_id = this.projectPageList[0].id
+          // 设置元素总数
         }else{
           this.page_id = ""
         }
@@ -180,25 +251,29 @@ export default {
     },
     // 添加元素
     addElement(formName) {
-      const addData = {...this.form};
-      addData['page_id'] = this.page_id;
-      element.addElement(addData)
-        .then((response) => {
-          if (response.data.code === 1) {
-            this.dialogFormVisible = false;
-            this.getElementList(this.page_id);
-            this.cancleAdd(formName)
-          } else {
-            this.$message(response.data.msg);
-          }
-        })
-        .catch((err) => {
-          this.$message(err.data.msg);
-        });
+      this.$refs[formName].validate((valid) => {
+        if(valid){
+          const addData = {...this.form};
+          addData['page_id'] = this.page_id;
+          element.addElement(addData)
+            .then((response) => {
+              if (response.data.code === 1) {
+                this.dialogFormVisible = false;
+                this.getElementList(this.page_id);
+                this.cancleAdd(formName)
+              } else {
+                this.$message(response.data.msg);
+              }
+            })
+        }
+        else{
+          return false
+        }
+      })
     },
     // 取消添加
-    cancleAdd() {
-      this.resetForm();
+    cancleAdd(formName) {
+      this.resetForm(formName);
       this.dialogFormVisible = false;
     },
     // 打开修改页面
@@ -226,7 +301,7 @@ export default {
     },
     // 删除元素
     deleteElement(del_element) {
-      const isDel = confirm("确定要删除该用户吗");
+      const isDel = confirm("确定要删除该元素吗");
       if (isDel) {
         element.deleteElement(del_element.id)
           .then((response) => {
@@ -242,7 +317,11 @@ export default {
       // 清空数据
       this.$refs[formName].resetFields()
     },
-    
+    // 修改页面后重新获取数据
+    pageChange(page){
+      this.currentPage = page;
+      this.getElementList(this.page_id)
+    }
   },
   watch:{
     pro_id(newValue, oldValue) {
@@ -261,7 +340,7 @@ export default {
     },
   },
   mounted() {
-    project.getProjectList()
+    tcase.getUserProjectList()
       .then((response) => {
         response.data.data.res_pro_list.forEach((pro) => {
           this.authorProjectList.push(pro);

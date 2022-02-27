@@ -2,8 +2,19 @@ import axios from './http'
 
 // 声明接口
 const page = {
-    getPageList(project_id){
-        return axios.get("page/",{params:{project_id:project_id}})
+    getPageList(project_id,currentPage,pageSize){
+        let params = null
+        if(currentPage){
+            params =
+                {
+                    project_id:project_id,
+                    current_page:currentPage,
+                    page_size:pageSize
+                }
+        }else{
+            params ={project_id:project_id}
+        }
+        return axios.get("page/",{params})
     },
 
     addPage(addPageData) {

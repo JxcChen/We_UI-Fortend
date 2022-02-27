@@ -21,11 +21,10 @@
                 v-model="password"
                 placeholder="密　码"
               />
-              <i class="fa fa-lock"></i>
-              <a href="#" class="fa fa-question-circle"></a>
+              <!-- <i class="fa fa-lock"></i>
+              <a href="#" class="fa fa-question-circle"></a> -->
             </div>
             <div class="form-group">
-
               <button class="btn btn-default" @click="login">登录</button>
             </div>
           </form>
@@ -37,7 +36,6 @@
 
 <script>
 import axios from "axios";
-import { mapMutations } from "vuex";
 export default {
   name: "Login",
   data() {

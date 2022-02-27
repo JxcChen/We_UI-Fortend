@@ -108,17 +108,31 @@
         
       </el-form>
     </el-dialog>
+    <pagenation
+      :total="count" 
+      :pageSize="pageSize" 
+      @change="pageChange">
+    </pagenation>
   </div>
 </template>
 
 <script>
 
-import project from '../api/project'
+import tcase from '../api/case'
 import page from '../api/page'
+import Pagenation from './Pagenation.vue'
 export default {
   name: "Page",
+  components:{
+    Pagenation
+  },
   data() {
     return {
+      // 当前页面
+      currentPage:1,
+      // 用例总数
+      count:0,
+      pageSize: 10,
       // 页面列表
       pages:[],
       // 是否进入编辑框
@@ -179,14 +193,15 @@ export default {
           return false
         }
       })
-        
-
-
-      
     },
+    // 获取页面列表
     getPageList(pro_id){
-      page.getPageList(pro_id).then(res =>{
-        this.pages = res.data.data.filter(p => p.project_id == this.pro_id)
+      page.getPageList(pro_id,this.currentPage,this.pageSize).then(res =>{
+        const resData = res.data.data
+        // 获取后端返回的页面列表
+        this.pages = resData.res_list.filter(p => p.project_id == this.pro_id)
+        // 设置总页数
+        this.count = resData.count
       })
     },
     // 取消添加
@@ -230,6 +245,11 @@ export default {
       // 清空数据
       this.$refs[formName].resetFields()
     },
+    // 修改页面后重新获取数据
+    pageChange(page){
+      this.currentPage = page;
+      this.getPageList(this.pro_id)
+    }
     
   },
   computed:{
@@ -241,14 +261,13 @@ export default {
     },
   },
   mounted() {
-    project.getProjectList()
+    tcase.getUserProjectList()
       .then((response) => {
         response.data.data.res_pro_list.forEach((pro) => {
           this.authorProjectList.push(pro);
         });
         if (response.data.data.res_pro_list.length > 0) {
           this.pro_id = response.data.data.res_pro_list[0].id;
-          this.getPageList(this.pro_id);
         } else {
           this.pro_id = "";
         }

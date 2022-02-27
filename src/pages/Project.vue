@@ -128,6 +128,11 @@
         <el-button type="danger" @click="setMember = false">取 消</el-button>
       </div>
     </el-dialog>
+    <pagenation
+      :total="count" 
+      :pageSize="pageSize" 
+      @change="pageChange">
+    </pagenation>
   </div>
 
   
@@ -138,10 +143,19 @@ import axios from "axios";
 import {mapState,mapMutations} from 'vuex';
 axios.defaults.withCredentials = true;
 import project from '../api/project'
+import Pagenation from './Pagenation.vue'
 export default {
   name: "Project",
+  components:{
+    Pagenation
+  },
   data() {
     return {
+      // 当前页面
+      currentPage:1,
+      // 用例总数
+      count:0,
+      pageSize: 10,
       projects: [],
       isEdit: false,
       dialogFormVisible: false,
@@ -207,9 +221,11 @@ export default {
       
     },
     getProjectList() {
-      project.getProjectList()
+      project.getProjectList(this.currentPage,this.pageSize)
         .then((response) => {
-          this.projects = response.data.data.res_pro_list;
+          const res = response.data.data.res_pro_list;
+          this.projects = res.pro_list;
+          this.count = res.count
         });
     },
     cancleAdd(formName) {
@@ -279,6 +295,11 @@ export default {
       // 清空数据
       this.$refs[formName].resetFields()
     },
+    // 修改页面后重新获取数据
+    pageChange(page){
+      this.currentPage = page;
+      this.getProjectList()
+    }
   },
   
   mounted() {

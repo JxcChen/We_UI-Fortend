@@ -1,6 +1,6 @@
 <template>
   <div style="width: 80% ;margin-left:10%;box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);border-radius: 20px">
-    <div style="margin:10px 10px 10px 10px;padding-top: 15px">
+    <div style="width:100%;margin:10px 10px 10px 10px;padding-top: 15px">
       当前项目：
       <el-select filterable size="small" v-model="pro_id" placeholder="请选择">
         <el-option
@@ -60,14 +60,14 @@
       </div>
     </div>
 
-    <el-table :data="cases" stripe >
+    <el-table :data="cases" stripe  >
       <el-table-column prop="id" label="id" width="100px" fixed> </el-table-column>
-      <el-table-column prop="name" label="用例名称" width="300px">
+      <el-table-column prop="name" label="用例名称" width="200px">
       </el-table-column>
-      <el-table-column prop="script_name" label="脚本名称" width="300px"> </el-table-column>
-      <el-table-column prop="is_threads" label="是否并发" width="150px"></el-table-column>
-      <el-table-column prop="is_auto_excuse_show" label="是否自动执行" width="150px"></el-table-column>
-      <el-table-column fixed="right" label="操作" >
+      <el-table-column prop="script_name" label="脚本名称" width="200px"> </el-table-column>
+      <el-table-column prop="is_threads" label="是否并发" width="100px"></el-table-column>
+      <el-table-column prop="is_auto_excuse_show" label="是否自动执行" width="100px"></el-table-column>
+      <el-table-column fixed="right" label="操作" width="600px">
         <template slot-scope="scope">
           <el-button
             ref="excuseBtn"
@@ -144,7 +144,6 @@
               slot="trigger"
               size="small"
               type="success"
-              @click="submitUpload"
               >选择脚本文件</el-button
             >
           </el-upload>
@@ -195,7 +194,7 @@
             :auto-upload="false"
             :limit="1"
             :on-exceed="handleExceed"
-            :file-list="utilsFileList"
+            :file-list="fileList"
             :headers="myHeader"
           >
             <el-button slot="trigger" size="small" type="success"
@@ -459,7 +458,7 @@ export default {
       this.fileList.splice(0, 1);
     },
     beforeUtilUpload(file) {
-      const isPY = file.type === 'text/x-python';
+      const isPY = (file.type === 'text/x-python' || file.type === '');
       const isLt200k = file.size / 1024 / 1024 < 0.2;
 
       if (!isPY) {
@@ -480,9 +479,8 @@ export default {
       this.$message.warning(`一次只能上传一个脚本文件`);
     },
     beforeRemove(file, fileList) {
-      const isdel = this.$confirm(`确定移除 ${file.name}？`);
-      if (isdel) this.form.script_name = "";
-      return isdel;
+      this.form.script_name = "";
+      return true;
     },
     // 进入新增页面
     intoAddPage(){
@@ -500,11 +498,13 @@ export default {
     // 添加用例
     addCase() {
       if(this.form['name']===''){
+        this.$message.error('用例名称不能为空')
         return
       }
       let addCaseData = this.form;
       addCaseData["project_id"] = this.pro_id;
       // 上传脚本文件
+      this.submitUpload()
       tcase.addCase(addCaseData)
       .then((response) => {
         this.dialogFormVisible = false;
@@ -595,11 +595,7 @@ export default {
     },
     // 查看报告
     lookReport(report_case){
-      axios.get(constant.baseURL+"case/report/" + report_case.id + "/",{
-            headers: {
-              Authorization: this.token,
-            },
-          })
+      tcase.lookReport(report_case.id)
           .then((response) => {
 
             if (response.data.code == 3) {
@@ -635,6 +631,7 @@ export default {
       this.form.is_auto_excuse = "1";
       this.form.retry_count = "";
       this.form.script_name = "";
+      this.fileList.splice(0);
     },
     // 并发执行用例
     concurrentExcution(){
@@ -663,7 +660,7 @@ export default {
     },
     // 下载调试包
     downloadClient(){
-      window.open(constant.baseURL+"case/downloadclient/45/")
+      window.open(constant.baseURL+"case/downloadclient/"+this.pro_id+"/")
     },
     //进入自动化任务设置编辑框
     intoSetAutoTask(){

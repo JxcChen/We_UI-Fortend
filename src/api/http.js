@@ -25,30 +25,34 @@ instance.interceptors.request.use(config=>{
 })
 instance.interceptors.response.use(res=>{
     //对错误的请求结果统一处理并且有信息提示
-    if(res.data.code==1){
-        return Promise.resolve(res);
-    }
-    else{
-        if (messageInstance) {
-            messageInstance.close();
-          }
-          messageInstance = Message({
-            type:'error',
-            message:res.data.msg,
-            center:true
-        })
-        // Promise.reject 返回一个带有错误原因的对象 会在console中打印出来
-        return Promise.reject(res);
-    }
+    return Promise.resolve(res);
+    // if(res.data.code==1){
+    //     return Promise.resolve(res);
+    // }
+    // // else{
+    //     if (messageInstance) {
+    //         messageInstance.close();
+    //       }
+    //       messageInstance = Message({
+    //         type:'error',
+    //         message:res.data.msg,
+    //         center:true
+    //     })
+    //     // Promise.reject 返回一个带有错误原因的对象 会在console中打印出来
+    //     return Promise.reject(res);
+    // }
 },
     error=>{
         const {response} = error
         if(response.status==401){
-            console.log(response.status)
+            // 未登录时
+            // 先清除原本的token
+            localStorage.clear()
+            console.log('++++++')
             if (messageInstance) {
                 messageInstance.close();
               }
-              messageInstance = Message({
+            messageInstance = Message({
                 type:'error',
                 message:'请先登录',
                 center:true
@@ -60,15 +64,17 @@ instance.interceptors.response.use(res=>{
                     redirect:router.currentRoute.fullPath
                 }
             })
+        }else{
+            if (messageInstance) {
+                messageInstance.close();
+              }
+              messageInstance = Message({
+                type:'error',
+                message:response.data.msg,
+                center:true
+            })
         }
-        if (messageInstance) {
-            messageInstance.close();
-          }
-          messageInstance = Message({
-            type:'error',
-            message:response.data.msg,
-            center:true
-        })
+        
         return Promise.reject(response)
     }
 )

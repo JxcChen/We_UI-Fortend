@@ -6,10 +6,12 @@ export default{
         return axios.post("/project/", addProjectData)
     },
     // 获取项目列表
-    getProjectList() {
+    getProjectList(currentPage,pageSize) {
         return axios.get("project/", {
             params: {
                 user_id: localStorage.getItem("UserId"),
+                current_page:currentPage,
+                page_size:pageSize
             },
         })
     },
