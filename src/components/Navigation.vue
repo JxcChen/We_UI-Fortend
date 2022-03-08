@@ -1,7 +1,10 @@
 <template>
   <div>
     <el-row :gutter="0">
-      <el-col :span="18">
+      <el-col :span="2">
+        <img src="../../public/static/we-ui图标.jpg" alt="首页" style="display:inline-block;height:60px;width:90px;margin-right: 30px" @click="toIndex">
+      </el-col>
+      <el-col :span="16">
         <div class="grid-content bg-purple">
           <el-menu
             :default-active="activeIndex2"
@@ -12,7 +15,6 @@
             active-text-color="#00A2E9"
             router
           >
-            <el-menu-item disabled>WE-UI</el-menu-item>
             <el-menu-item index="case">用例管理</el-menu-item>
             <!-- <el-menu-item index="task">任务管理</el-menu-item> -->
             <el-menu-item index="user">人员管理</el-menu-item>
@@ -65,6 +67,9 @@ export default {
         this.changePassword()
       }
       
+    },
+    toIndex(){
+      this.$router.push({path:"/"})
     },
     ...mapMutations(['changePassword']),
   },

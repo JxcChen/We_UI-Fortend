@@ -1,13 +1,13 @@
 <template>
     <el-container style="height: 100%; border: 1px solid #eee;">
         
-        <el-header style="text-align: right; font-size: 12px">
+        <el-header style="text-align: right; font-size: 12px;padding-left:0;margin-right:40px;">
             <template >
               <Navigation></Navigation>
             </template>
         </el-header>
         
-        <el-main style="width: 1800px;margin-left:auto;margin-right:auto;"  >
+        <el-main style="width:80%;margin-left:10%;margin-right:10%;"  >
             <router-view></router-view>
             <el-dialog
               title="修改密码"

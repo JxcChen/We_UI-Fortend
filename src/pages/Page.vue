@@ -1,6 +1,6 @@
 <template>
-  <div style="width: 80% ;margin-left:10%;box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);border-radius: 20px">
-    <div style="margin:10px 10px 10px 10px;padding-top:10px">
+  <div style="box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);border-radius: 20px">
+    <div style="margin:10px 10px 10px 10px;padding:10px">
       <el-button  @click="intoAddPage" style="margin-left:10px;" size="small" >新 增 页 面</el-button>
       <span style="float:left">
         当前项目：
@@ -14,6 +14,9 @@
             >
             </el-option>
         </el-select>
+      </span>
+      <span>
+        <search :searchData="searchData" @search='search'></search>
       </span>
     </div>
     
@@ -121,10 +124,12 @@
 import tcase from '../api/case'
 import page from '../api/page'
 import Pagenation from './Pagenation.vue'
+import Search from './Search.vue'
 export default {
   name: "Page",
   components:{
-    Pagenation
+    Pagenation,
+    Search
   },
   data() {
     return {
@@ -132,6 +137,8 @@ export default {
       currentPage:1,
       // 用例总数
       count:0,
+      // 搜索内容
+      searchData:'',
       pageSize: 10,
       // 页面列表
       pages:[],
@@ -249,6 +256,16 @@ export default {
     pageChange(page){
       this.currentPage = page;
       this.getPageList(this.pro_id)
+    },
+    search(searchData){
+        page.getSearchPageList(this.pro_id,this.currentPage,this.pageSize,searchData)
+        .then((res) =>{
+          const resData = res.data.data
+          // 获取后端返回的页面列表
+          this.pages = resData.res_list.filter(p => p.project_id == this.pro_id)
+          // 设置总页数
+          this.count = resData.count
+        })
     }
     
   },

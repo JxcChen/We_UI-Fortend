@@ -1,6 +1,6 @@
 <template>
-  <div style="width: 80% ;margin-left:10%;box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);border-radius: 20px">
-    <div style="margin:10px 10px 10px 10px;padding-top:10px">
+  <div style="box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);border-radius: 20px">
+    <div style="margin:10px 10px 10px 10px;padding:10px">
       
       <span >
         当前项目：
@@ -27,6 +27,7 @@
         </el-select>
       </span>
       <el-button  @click="intoAddPage" style="margin-left:10px;" size="small" >新 增 元 素</el-button>
+        <search style="display:inline-block" :searchData="searchData" @search='search'></search>
     </div>
     
      
@@ -35,7 +36,8 @@
       <el-table-column prop="name" label="元素名称名称" width="200px"></el-table-column>
       <el-table-column prop="loc_method" label="定位方式" width="200px"></el-table-column>
       <el-table-column prop="element_location" label="元素定位"> </el-table-column>
-      
+      <el-table-column prop="index" label="元素索引" width="100px"> </el-table-column>
+      <el-table-column prop="tag" label="tag内容"> </el-table-column>
       <el-table-column fixed="right" label="操作" >
         <template slot-scope="scope">
           <el-button
@@ -85,6 +87,12 @@
         <el-form-item label="元素定位" style="margin-top: 20px" prop="element_location">
           <el-input  placeholder="请输入元素定位" v-model="form.element_location" style="width: 350px"></el-input>
         </el-form-item>
+        <el-form-item label="元素索引" style="margin-top: 20px">
+          <el-input  placeholder="请输入元素索引" v-model="form.index" style="width: 350px"></el-input>
+        </el-form-item>
+        <el-form-item label="tag值" style="margin-top: 20px" prop="tag">
+          <el-input  placeholder="请输入tag值" v-model="form.tag" style="width: 350px"></el-input>
+        </el-form-item>
         <el-form-item style="margin-left:40px">
           <el-button type="primary" @click="addElement('addElementForm')">确 定</el-button>
           <el-button type="danger" @click="dialogFormVisible=false;resetForm('addElementForm')">取 消</el-button>
@@ -120,6 +128,12 @@
         <el-form-item label="元素定位" style="margin-top: 20px" prop="name">
           <el-input  placeholder="请输入元素定位" v-model="edit_form.element_location" style="width: 350px"></el-input>
         </el-form-item>
+        <el-form-item label="元素索引" style="margin-top: 20px">
+          <el-input  placeholder="请输入元素索引" v-model="edit_form.index" style="width: 350px"></el-input>
+        </el-form-item>
+        <el-form-item label="tag值" style="margin-top: 20px" prop="tag">
+          <el-input  placeholder="请输入tag值" v-model="edit_form.tag" style="width: 350px"></el-input>
+        </el-form-item>
         <el-form-item label="所属页面" style="margin-top: 20px" prop="name">
           <el-select size="small" v-model="edit_form.page_id" filterable placeholder="请选择">
             <el-option
@@ -154,10 +168,12 @@ import tcase from '../api/case'
 import page from '../api/page'
 import element from '../api/element'
 import Pagenation from './Pagenation.vue'
+import Search from './Search.vue'
 export default {
   name: "Element",
   components:{
-    Pagenation
+    Pagenation,
+    Search
   },
   data() {
     return {
@@ -188,8 +204,12 @@ export default {
           label: 'tag'
         }],
       eleList:[],
+      // 当前项目id
       pro_id:'',
+      // 当前页面id
       page_id:'',
+      // 搜索内容
+      searchData:'',
       // 是否进入编辑框
       isEdit: false,
       // 用户类型列表
@@ -201,19 +221,24 @@ export default {
       form: {
         name: "",
         element_location: "",
-        loc_method:""
+        loc_method:"",
+        tag:"",
+        index:0
       },
       // 编辑表单
       edit_form: {
         id:"",
         name: "",
         element_location: "",
-        loc_method:""
+        loc_method:"",
+        tag:"",
+        index:0
       },
       rules:{
         name:[{required: true, message: '元素名称不能为空', trigger: 'blur'}],
         element_location:[{required: true, message: '元素定位不能为空', trigger: 'blur'}],
         loc_method:[{required: true, message: '定位方式不能为空', trigger: 'blur'}],
+        tag:[{required: true, message: 'tag值不能为空', trigger: 'blur'}],
       },
       
       
@@ -321,6 +346,13 @@ export default {
     pageChange(page){
       this.currentPage = page;
       this.getElementList(this.page_id)
+    },
+    search(searchData){
+        element.getSearchElementList(this.page_id,this.currentPage,this.pageSize,searchData)
+        .then(res =>{
+          this.eleList = res.data.data.res_list
+          this.count = res.data.data.count
+        })
     }
   },
   watch:{

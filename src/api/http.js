@@ -3,7 +3,7 @@ import {Message} from 'element-ui'
 import router from '../router'
 axios.defaults.withCredentials = true;
 // var api = "http://stuq.ceshiren.com:8089"
-var api = "http://127.0.0.1:8001/api/"
+var api = "http://192.168.1.103:8001/api/"
 var messageInstance = null
 var instance = axios.create({
     headers:{
@@ -48,7 +48,6 @@ instance.interceptors.response.use(res=>{
             // 未登录时
             // 先清除原本的token
             localStorage.clear()
-            console.log('++++++')
             if (messageInstance) {
                 messageInstance.close();
               }

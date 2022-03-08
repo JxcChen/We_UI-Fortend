@@ -1,5 +1,5 @@
 <template>
-  <div style="width: 80% ;margin-left:10%;box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);border-radius: 20px">
+  <div style="box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);border-radius: 20px">
     <el-button v-show="isAdmin" @click="dialogFormVisible = true" style="margin:10px 0 10px 10px">新增用户</el-button>
     <el-table :data="users" stripe>
       <el-table-column prop="id" label="id" width="100px"> </el-table-column>

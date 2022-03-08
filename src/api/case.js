@@ -12,6 +12,17 @@ const tcase = {
         },
       })
   },
+  // 获取对应项目下的所有用例
+  getSearchCaseList(pro_id,currentPage,pageSize,searchData) {
+    return axios.get("case/", {
+        params: {
+          "pro_id": pro_id,
+          current_page: currentPage,
+          page_size: pageSize,
+          search_data:searchData
+        },
+      })
+  },
   // 添加用例
   addCase(params) {
     return axios.post("case/", params)

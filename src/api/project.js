@@ -15,6 +15,16 @@ export default{
             },
         })
     },
+    getSearchPageList(currentPage,pageSize,searchData) {
+        return axios.get("project/", {
+            params: {
+                user_id: localStorage.getItem("UserId"),
+                current_page:currentPage,
+                page_size:pageSize,
+                search_data:searchData
+            },
+        })
+    },
     // 编辑项目
     editProject(edit_id,edit_data) {
         return axios.put("/project/" + edit_id + "/",edit_data,)

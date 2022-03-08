@@ -1,6 +1,7 @@
 <template>
-  <div  style="width: 80% ;margin-left:10%;box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);border-radius: 20px" >
-    <el-button @click="dialogFormVisible = true" style="margin:10px 0 10px 10px">新增项目</el-button>
+  <div style="box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);border-radius: 20px;padding:10px" >
+    <el-button @click="dialogFormVisible = true">新增项目</el-button>
+    <search :searchData="searchData" @search='search'></search>
     <el-table  :data="projects" stripe >
       <el-table-column prop="id" label="id" width="80px"> </el-table-column>
       <el-table-column prop="name" label="项目名称" width="120px" >
@@ -144,10 +145,11 @@ import {mapState,mapMutations} from 'vuex';
 axios.defaults.withCredentials = true;
 import project from '../api/project'
 import Pagenation from './Pagenation.vue'
+import Search from './Search.vue'
 export default {
   name: "Project",
   components:{
-    Pagenation
+    Pagenation,Search
   },
   data() {
     return {
@@ -156,6 +158,7 @@ export default {
       // 用例总数
       count:0,
       pageSize: 10,
+      searchData:'',
       projects: [],
       isEdit: false,
       dialogFormVisible: false,
@@ -227,6 +230,14 @@ export default {
           this.projects = res.pro_list;
           this.count = res.count
         });
+    },
+    search(searchData){
+        project.getSearchPageList(this.currentPage,this.pageSize,searchData)
+        .then((response) =>{
+          const res = response.data.data.res_pro_list;
+          this.projects = res.pro_list;
+          this.count = res.count
+        })
     },
     cancleAdd(formName) {
       this.resetForm(formName);

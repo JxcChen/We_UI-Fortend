@@ -16,6 +16,21 @@ const page = {
         }
         return axios.get("page/",{params})
     },
+    getSearchPageList(project_id,currentPage,pageSize,searchData){
+        let params = null
+        if(currentPage){
+            params =
+                {
+                    project_id:project_id,
+                    current_page:currentPage,
+                    page_size:pageSize,
+                    search_data:searchData
+                }
+        }else{
+            params ={project_id:project_id}
+        }
+        return axios.get("page/",{params})
+    },
 
     addPage(addPageData) {
         return axios.post("page/", addPageData)

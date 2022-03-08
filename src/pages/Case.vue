@@ -1,6 +1,6 @@
 <template>
-  <div style="width: 80% ;margin-left:10%;box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);border-radius: 20px">
-    <div style="width:100%;margin:10px 10px 10px 10px;padding-top: 15px">
+  <div style="box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);border-radius: 20px">
+    <div style="width:100%;margin:10px 10px 10px 10px;padding: 10px">
       当前项目：
       <el-select filterable size="small" v-model="pro_id" placeholder="请选择">
         <el-option
@@ -46,7 +46,8 @@
         @click="intoAddPage"
         >新增用例</el-button
       >
-      <div style="float: right">
+      <search :searchData="searchData" @search='search'></search>
+      <div style="margin-top: 15px;">
         执行路径：
         <el-select size="small" v-model="excuseHost" placeholder="请选择">
           <el-option
@@ -60,17 +61,17 @@
       </div>
     </div>
 
-    <el-table :data="cases" stripe  >
+    <el-table :data="cases" stripe>
       <el-table-column prop="id" label="id" width="100px" fixed> </el-table-column>
-      <el-table-column prop="name" label="用例名称" width="200px">
+      <el-table-column prop="name" label="用例名称" width="300px">
       </el-table-column>
-      <el-table-column prop="script_name" label="脚本名称" width="200px"> </el-table-column>
+      <el-table-column prop="script_name" label="脚本名称" width="350px"> </el-table-column>
       <el-table-column prop="is_threads" label="是否并发" width="100px"></el-table-column>
-      <el-table-column prop="is_auto_excuse_show" label="是否自动执行" width="100px"></el-table-column>
-      <el-table-column fixed="right" label="操作" width="600px">
+      <el-table-column prop="is_auto_excuse_show" label="是否自动执行" width="150px"></el-table-column>
+      <el-table-column fixed="right" label="操作" width="480px">
         <template slot-scope="scope">
           <el-button
-            ref="excuseBtn"
+            :ref="id"
             type="primary"
             size="small"
             icon="el-icon-caret-right"
@@ -257,15 +258,32 @@
             :action="uploadUtilsUrl"
             multiple
             :auto-upload="true"
-            :limit="3"
             :before-upload="beforeUtilUpload"
             :file-list="utilsFileList"
             :headers="myHeader"
+            :on-success="handleUtilsSuccess"
           >
             <el-button slot="trigger" size="small" type="success" style="margin-left: 10px"
               >点击更新工具包</el-button
             >
-      </el-upload>
+          </el-upload>
+        </div>
+        <div>
+          <h5>更新页面:页面主要作用于pageObject模式脚本,上传的文件须为python文件</h5>
+          <el-upload
+            class="upload-demo"
+            :action="uploadPagesUrl"
+            multiple
+            :auto-upload="true"
+            :before-upload="beforeUtilUpload"
+            :file-list="pagesFileList"
+            :headers="myHeader"
+            :on-success="handleUtilsSuccess"
+          >
+            <el-button slot="trigger" size="small" type="success" style="margin-left: 10px"
+              >点击更新页面</el-button
+            >
+          </el-upload>
         </div>
       </div>
       
@@ -359,10 +377,12 @@ import constant from "../constant/constant"
 import {mapState,mapMutations} from 'vuex';
 import tcase from "../api/case"
 import Pagenation from "./Pagenation.vue"
+import Search from "./Search.vue"
 export default {
   name: "Project",
   components:{
-    Pagenation
+    Pagenation,
+    Search
   },
   data() {
     return {
@@ -374,6 +394,7 @@ export default {
       // 自动化任务任务设置默认选项
       activeName: 'first',
       sendType: '1',
+      searchData:'',
       typeList:[{value:'1',label:'邮箱'},{value:'2',label:'企业微信'}],
       // 用例列表
       cases: [],
@@ -428,6 +449,7 @@ export default {
       fileList: [],
       // 上传的工具类列表
       utilsFileList: [],
+      pagesFileList: [],
       // 上传的脚本名称
       fileName: "",
       token: localStorage.Authorization,
@@ -451,21 +473,24 @@ export default {
     };
   },
   methods: {
-    handleClick(tab, event) {
-        
+    handleChange(file) {
+        this.fileList.splice(0, 1,file.name);
     },
-    handleSuccess(file) {
+    handleSuccess() {
       this.fileList.splice(0, 1);
     },
-    beforeUtilUpload(file) {
-      const isPY = (file.type === 'text/x-python' || file.type === '');
-      const isLt200k = file.size / 1024 / 1024 < 0.2;
+    handleUtilsSuccess(){
+      this.$message.success('上传成功')
 
+    },
+    beforeUtilUpload(file) {
+      const isPY = (file.type === 'text/x-python-script' || file.type === 'application/zip');
+      const isLt200k = file.size / 1024 / 1024 < 0.6;
       if (!isPY) {
-        this.$message.error('上传工具类只能是python文件!');
+        this.$message.error('只能上传python文件!');
       }
       if (!isLt200k) {
-        this.$message.error('上传工具类大小不能超过 200KB!');
+        this.$message.error('大小不能超过 600KB!');
       }
       return isPY && isLt200k;
     },
@@ -533,6 +558,23 @@ export default {
           this.cases = response.data.data.res_list;
           this.count = response.data.data.count
 
+        });
+    },
+    // 搜索caseList
+    search(searchData){
+      tcase.getSearchCaseList(this.pro_id,this.currentPage,this.pageSize,searchData)
+      .then((response) => {
+          // 将并发以是否进行展示
+          response.data.data.res_list.forEach((c) => {
+            c["is_thread"] === 1
+              ? (c["is_threads"] = "是")
+              : (c["is_threads"] = "否");
+            c["is_auto_excuse"] == 1
+            ? (c["is_auto_excuse_show"] = "是")
+            : (c["is_auto_excuse_show"] = "否");
+          });
+          this.cases = response.data.data.res_list;
+          this.count = response.data.data.count
         });
     },
     // 进入修改用例页面
@@ -650,7 +692,7 @@ export default {
         if(response.data.code === 1){
           this.isLookReportSummary = true
           this.$nextTick(() => {
-            // 将js脚本内容插入到标签当中
+            // 将html内容插入到标签当中
             this.$refs.reportSummary.innerHTML = response.data.data
           })
         }else{
@@ -763,6 +805,9 @@ export default {
     },
     uploadUtilsUrl(){
       return constant.baseURL+"case/uploadUtils/" + this.pro_id + "/";
+    },
+    uploadPagesUrl(){
+      return constant.baseURL+"case/uploadPages/" + this.pro_id + "/";
     },
     ...mapState(['users']),
   },

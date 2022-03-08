@@ -3,7 +3,7 @@
     <div class="container" :style="bgI">
       <div class="row">
         <div class="col-md-offset-3 col-md-6">
-          <form class="form-horizontal">
+          <form class="form-horizontal"  style="position: relative;width: 440px;height: 340px;left: -6%;margin-top: 95px;">
             <span class="heading">用户登录</span>
             <div class="form-group">
               <input
@@ -35,7 +35,7 @@
 </template>
 
 <script>
-import axios from "axios";
+import axios from "../api/http.js";
 export default {
   name: "Login",
   data() {
@@ -54,7 +54,7 @@ export default {
           password: this.password,
         };
         axios
-          .post("http://127.0.0.1:8001/api/login/", loginData)
+          .post("login/", loginData)
           .then((response) => {
             // 将认证信息放置localStorage
             localStorage.clear();

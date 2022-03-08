@@ -12,7 +12,7 @@ const mutations = {
     // 将登录态存到本地
     getUserList(state,type){
         axios
-        .get("http://127.0.0.1:8001/api/user/", {
+        .get("user/", {
           headers: {
             Authorization: localStorage.getItem('Authorization'),
           },
